@@ -7,7 +7,7 @@ from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
 from resources.lib.util import cUtil
-from resources.lib.comaddon import progress
+from resources.lib.comaddon import progress#, VSlog
 from resources.lib.multihost import cJheberg
 import re, unicodedata
 
@@ -171,7 +171,7 @@ def showMovies(sSearch = ''):
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == False):
-		oGui.addText(SITE_IDENTIFIER)
+        oGui.addText(SITE_IDENTIFIER)
 
     if (aResult[0] == True):
 
@@ -192,24 +192,24 @@ def showMovies(sSearch = ''):
             sTitle = aEntry[2].replace('Saiosn', 'Saison')
             if 'Brouillon' in sTitle:
                 sTitle = sUrl1.rsplit('/', 2)[1]
-                sTitle = sTitle.replace('-streaming-telecharger', '').replace('-',' ')
-                
+                sTitle = sTitle.replace('-streaming-telecharger', '').replace('-', ' ')
+
             sTitle = sTitle.replace(' [Streaming]', '')
             sTitle = sTitle.replace(' [Telecharger]', '').replace(' [Telechargement]', '')
-            
+
             sDisplayTitle = sTitle
             # on retire la qualité
             sTitle = re.sub('\[\w+]', '', sTitle)
             sTitle = re.sub('\[\w+ \w+]', '', sTitle)
- 
+
             sThumb = aEntry[1]
 
             if sSearch:
                 sDesc = ''
             else:
-                sDesc = aEntry[3].replace('[&hellip;]', '').replace('&rsquo;', '\'').replace('&#8217;', '\'').replace('&#8230;', '...')
-                
- 
+                sDesc = aEntry[3].replace('[&hellip;]', '').replace('&hellip;', '...').replace('&rsquo;', '\'').replace('&#8217;', '\'').replace('&#8230;', '...')
+
+
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sUrl1)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
@@ -228,13 +228,13 @@ def showMovies(sSearch = ''):
 
         progress_.VSclose(progress_)
 
+    if not sSearch:
         sNextPage = __checkForNextPage(sHtmlContent)
         if (sNextPage != False):
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sNextPage)
             oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Suivant >>>[/COLOR]', oOutputParameterHandler)
 
-    if not sSearch:
         oGui.setEndOfDirectory()
 
 def __checkForNextPage(sHtmlContent):
@@ -277,14 +277,14 @@ def showSeries(sLoop = False):
     except:
         pass
 
-    sPattern = '<span style="color: #33cccc;[^<>"]*">(?:<(?:strong|b)>)*((?:Stream|Telec)[^<>]+)|"center">(.pisode[^<]{2,12})<(?!\/a>)(.*?a href="http.+?)(?:<.p>|<br|<.div)'
+    sPattern = '<span style="color: #33cccc;[^<>"]*">(?:<(?:strong|b)>)((?:Stream|Telec)[^<>]+)|"center">(.pisode[^<]{2,12})*<(?!\/a>)([^<>]*a href="http.+?)(?:<.p>|<br|<.div)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     #astuce en cas d'episode unique
-    if (aResult[0] == False) and (sLoop == False):
-        #oGui.setEndOfDirectory()
-        serieHosters(True)
-        return
+    #if (aResult[0] == False) and (sLoop == False):
+    #    #oGui.setEndOfDirectory()
+    #    serieHosters(True)
+    #    return
 
     if (aResult[0] == True):
         total = len(aResult[1])
@@ -301,7 +301,15 @@ def showSeries(sLoop = False):
             #episode
             else:
                 sUrl = aEntry[2]
-                sTitle = sMovieTitle + ' ' + aEntry[1].replace(' New', '')
+
+                SXXEX = re.search(">(S[0-9]{2}E[0-9]{2})<", sUrl)
+                HOST = re.search('a href="https*:\/\/([^"]+)', sUrl)
+                if SXXEX:
+                    sTitle = sMovieTitle + ' ' + SXXEX.group(1)
+                    if HOST:
+                        sTitle = sTitle + ' (' + HOST.group(1).split('/')[0] + ')'
+                else:
+                    sTitle = sMovieTitle + ' ' + aEntry[1].replace(' New', '')
 
                 oOutputParameterHandler = cOutputParameterHandler()
                 oOutputParameterHandler.addParameter('siteUrl', sUrl)

@@ -23,9 +23,7 @@ class cHosterGui:
     def showHoster(self, oGui, oHoster, sMediaUrl, sThumbnail, bGetRedirectUrl = False):
 
         oInputParameterHandler = cInputParameterHandler()
-        sMovieTitle = oInputParameterHandler.getValue('title')
-
-
+#         sMovieTitle = oInputParameterHandler.getValue('title')
 
         oGuiElement = cGuiElement()
         oGuiElement.setSiteName(self.SITE_NAME)
@@ -124,14 +122,16 @@ class cHosterGui:
 
         #oGui.addFolder(oGuiElement, oOutputParameterHandler)
 
-    def checkHoster(self, sHosterUrl):
 
-        #securitee
+
+    def checkHoster(self, sHosterUrl):
+        #securite
         if (not sHosterUrl):
             return False
 
         #Petit nettoyage
         sHosterUrl = sHosterUrl.split('|')[0]
+        sHosterUrl = sHosterUrl.lower()
 
         #Recuperation du host
         try:
@@ -169,7 +169,7 @@ class cHosterGui:
             return self.getHoster('mixdrop')
         if ('mixloads' in sHostName):
             return self.getHoster('mixloads')
-        if ('vidoza.' in sHostName):
+        if ('vidoza' in sHostName):
             return self.getHoster('vidoza')
         if (('youtube' in sHostName) or ('youtu.be' in sHostName)):
             return self.getHoster('youtube')
@@ -212,8 +212,8 @@ class cHosterGui:
             return self.getHoster('speedvideo')
         if ('speedvid' in sHostName):
             return self.getHoster('speedvid')
-        #if (('netu' in sHostName) or ('hqq' in sHostName)):
-           # return self.getHoster('netu')
+        if (('netu' in sHostName) or ('hqq' in sHostName) or ('waaw' in sHostName) or ('vizplay' in sHostName)):
+            return self.getHoster('netu')
         if ('upstream' in sHostName):
             return self.getHoster('upstream')
         if ('mail.ru' in sHostName):
@@ -255,7 +255,7 @@ class cHosterGui:
         if ('wstream.' in sHostName):
             return self.getHoster('wstream')
         if ('watchvideo' in sHostName):
-             return self.getHoster('watchvideo')
+            return self.getHoster('watchvideo')
         if ('drive.google.com' in sHostName):
             return self.getHoster('googledrive')
         if ('docs.google.com' in sHostName):
@@ -332,20 +332,20 @@ class cHosterGui:
             return self.getHoster('rapidstream')
         if ('beeload' in sHostName):
             return self.getHoster('beeload')
-        if ('verystream.' in sHostName):
-            return self.getHoster('verystream')
         if ('archive.' in sHostName):
             return self.getHoster('archive')
         if ('freshstream' in sHostName):
             return self.getHoster('freshstream')
         if ('jetload' in sHostName):
             return self.getHoster('jetload')
-        if ('french-vid' in sHostName or 'fembed.' in sHostName or 'yggseries' in sHostName or 'sendvid' in sHostName or 'vfsplayer' in sHostName or 'fsimg' in sHostName):
+        if ('french-vid' in sHostName or 'fembed.' in sHostName or 'yggseries' in sHostName or 'sendvid' in sHostName or 'vfsplayer' in sHostName or 'fsimg' in sHostName or 'fem.tohds' in sHostName):
             return self.getHoster('frenchvid')
         if ('flix555' in sHostName):
             return self.getHoster('flix555')
         if ('onlystream' in sHostName or 'gotochus' in sHostName):
             return self.getHoster('onlystream')
+        if ('pstream' in sHostName):
+            return self.getHoster('pstream')
         
         #Lien telechargeable a convertir en stream
         if ('1fichier' in sHostName):

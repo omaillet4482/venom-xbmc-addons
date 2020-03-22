@@ -7,7 +7,7 @@ from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
 from resources.lib.util import cUtil
-from resources.lib.comaddon import progress#, VSlog
+from resources.lib.comaddon import progress
 import re, base64
 
 from resources.lib.packer import cPacker
@@ -20,17 +20,17 @@ SITE_DESC = 'Site de streaming en HD'
 
 URL_MAIN = 'https://hdss.to/'
 
-MOVIE_MOVIE = (URL_MAIN + 'films/', 'showMovies')
-MOVIE_NEWS = (URL_MAIN + 'films/', 'showMovies')
+MOVIE_MOVIE = (URL_MAIN + 'films-z/', 'showMovies')
+MOVIE_NEWS = (URL_MAIN + 'films-z/', 'showMovies')
 MOVIE_COMMENTS = (URL_MAIN + 'populaires/', 'showMovies')
 MOVIE_NOTES = (URL_MAIN + 'mieux-notes/', 'showMovies')
 MOVIE_GENRES = (True, 'showMovieGenres')
 MOVIE_LIST = (True, 'showAlpha')
 
-SERIE_SERIES = (URL_MAIN + 'tv-seriess/', 'showMovies')
-SERIE_NEWS = (URL_MAIN + 'tv-seriess/', 'showMovies')
+SERIE_SERIES = (URL_MAIN + 'tv-series-z/', 'showMovies')
+SERIE_NEWS = (URL_MAIN + 'tv-series-z/', 'showMovies')
 
-URL_SEARCH = (URL_MAIN + 'search/', 'showMovies')
+URL_SEARCH = (URL_MAIN + '?s=', 'showMovies')
 URL_SEARCH_MOVIES = (URL_SEARCH[0], 'showMovies')
 URL_SEARCH_SERIES = (URL_SEARCH[0], 'showMovies')
 FUNCTION_SEARCH = 'sHowResultSearch'
@@ -169,21 +169,22 @@ def showMovies(sSearch=''):
 
     if sSearch:
         sUrl = sSearch.replace(' ', '+')
+        
     else:
         sUrl = oInputParameterHandler.getValue('siteUrl')
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
     #réécriture pour prendre les séries dans le menu des genres
-    sHtmlContent = sHtmlContent.replace('<span class="Qlty">TV</span></div><h3', '</div><h3')
+    #sHtmlContent = sHtmlContent.replace('<span class="Qlty">TV</span></div><h3', '</div><h3')
 
     #fh = open('d:\\test.txt', "w")
     #fh.write(sHtmlContent)
     #fh.close()
-    if 'letters' in sUrl:
-        sPattern = '<td class="MvTbImg"> *<a href="([^"]+)".+?(?:<img |data-wpfc-original-)src="([^"]+)".+?strong>([^<]+)<.+?span class="Qlty">([^<]+)<'
+    if sSearch:
+        sPattern = 'Title">Search<.+?<a href="([^"]+)".+?img src="([^"]+)".+?Title">([^<]+).+?Year">([^<]+).+?Qlty">([^<]+).+?Description"><p>([^<]+)'
     else:
-        sPattern = 'class="TPost C">.+?href="([^"]+)">.+?<img.+?src="([^"]+)".+?<h3 class="Title">([^<]+)</h3> .+?class="Qlty">([^<]+)<.+?<p>.+?streaming,([^<]+)'
+        sPattern = 'class="TPost C">.+?href="([^"]+)".+?img src="([^"]+)".+?Title">([^<]+).+?Year">([^<]+).+?Qlty">([^<]+).+?Description"><p>([^<]+)'
 
     aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -198,19 +199,19 @@ def showMovies(sSearch=''):
             if progress_.iscanceled():
                 break
 
-            if 'letters' in sUrl:
-                sDesc = ''
-            else:
-                sDesc = aEntry[4]
+            
+            
 
             siteUrl = aEntry[0]
-            sThumb = aEntry[1].replace('w92', 'w342')
+            sThumb = aEntry[1]#.replace('w92', 'w342')
             if sThumb.startswith('//'):
                 sThumb = 'https:' + sThumb
             sTitle = aEntry[2]
-            sQual = aEntry[3]
-
-            sDisplayTitle = ('%s [%s]') % (sTitle, sQual)
+            sYear = aEntry[3]
+            sQual = aEntry[4]
+            sDesc = aEntry[5]
+            
+            sDisplayTitle = ('%s [%s] (%s)') % (sTitle, sQual, sYear)
 
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', siteUrl)
@@ -300,7 +301,7 @@ def showHosters():
     sHtmlContent = oRequestHandler.request()
 
     #Recuperer variable pour url de base
-    sPattern = 'id=.+?trembed=([^"]+).+?frameborder'
+    sPattern = 'trembed=(\d+).+?trid=(\d+).+?trtype=(\d+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == False):
@@ -309,7 +310,7 @@ def showHosters():
     if (aResult[0] == True):
         for aEntry in aResult[1]:
 
-            site = URL_MAIN + "?trembed=" + aEntry
+            site = URL_MAIN + "?trembed="+ aEntry[0] +"&trid="+ aEntry[1] + "&trtype="+ aEntry[2]
             oRequestHandler = cRequestHandler(site)
             sHtmlContent = oRequestHandler.request()
 
@@ -327,6 +328,7 @@ def showHosters():
             aResult = oParser.parse(sHtmlContent, sPattern1)
 
             sPost = decode(aResult[1][0])
+
             if sPost:
 
                 sUrl1 = URL_MAIN + '?trhidee=1&trfex=' + sPost
@@ -337,8 +339,8 @@ def showHosters():
 
                 sHosterUrl = oRequestHandler.getRealUrl()
 
-#https://lb.hdsto.me/hls/xxx.playlist.m3u8
-#https://lb.hdsto.me/public/dist/index.html?id=xxx
+                #https://lb.hdsto.me/hls/xxx.playlist.m3u8
+                #https://lb.hdsto.me/public/dist/index.html?id=xxx
 
                 if 'public/dist' in sHosterUrl:
                     sHosterUrl = 'https://' + sHosterUrl.split('/')[2] + '/hls/' + sHosterUrl.split('id=')[1] + '/' + sHosterUrl.split('id=')[1] + '.m3u8'
@@ -348,13 +350,12 @@ def showHosters():
                     sHtmlContent = oRequestHandler.request()
 
                     sHosterUrl = oRequestHandler.getRealUrl()
-                    sHosterUrl = sHosterUrl.replace('.playlist','')
 
-                    oHoster = cHosterGui().checkHoster(sHosterUrl)
-                    if (oHoster != False):
-                        oHoster.setDisplayName(sMovieTitle)
-                        oHoster.setFileName(sMovieTitle)
-                        cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
+                oHoster = cHosterGui().checkHoster(sHosterUrl)
+                if (oHoster != False):
+                    oHoster.setDisplayName(sMovieTitle)
+                    oHoster.setFileName(sMovieTitle)
+                    cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
 
     oGui.setEndOfDirectory()
 

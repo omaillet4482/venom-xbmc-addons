@@ -103,7 +103,7 @@ def showAnimes():
     sHtmlContent = oRequestHandler.request()
 
     #sPattern = '<h2 style="text-align: center;"><a href="([^"]+)">(.+?)</a>'
-    sPattern = 'class="menublocks".+?href="([^"]+)">([^<]+)</a>.+?src="([^"]+)"'
+    sPattern = 'class="menublocks".+?Synopsis:([^"]+)" *href="([^"]+)">([^<]+)</a>.+?data-lazy-src="([^"]+)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
@@ -114,9 +114,10 @@ def showAnimes():
             if progress_.iscanceled():
                 break
 
-            sUrl = aEntry[0]
-            sTitle = aEntry[1]
-            sThumb = aEntry[2]
+            sDesc = aEntry[0]
+            sUrl = aEntry[1]
+            sTitle = aEntry[2]
+            sThumb = aEntry[3]
 
             #traitement du titre pour compatibilite
             sTitle = sTitle.replace('(', ' ').replace(')', ' ')#.replace('-', ' ')
@@ -127,7 +128,7 @@ def showAnimes():
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
 
-            oGui.addTV(SITE_IDENTIFIER, 'showEpisodes', sTitle, 'anim.png', sThumb, '', oOutputParameterHandler)
+            oGui.addTV(SITE_IDENTIFIER, 'showEpisodes', sTitle, 'anim.png', sThumb, sDesc, oOutputParameterHandler)
         progress_.VSclose(progress_)
     oGui.setEndOfDirectory()
 
@@ -155,7 +156,7 @@ def showEpisodes():
 
     #récupération du poster
     sThumb = ''
-    sPattern = '<h4 style=".+?"><img class="alignright".+?src="(.+?)"'
+    sPattern = '<h4 style=".+?"><img class="alignright".+?data-lazy-src="(.+?)"'
     sThumbResult = oParser.parse(sUsentContent, sPattern)
     if sThumbResult[0]:
         sThumb = sThumbResult[1][0]
@@ -285,7 +286,7 @@ def showHosters():
     sTitle = oInputParameterHandler.getValue('sMovieTitle')
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-    sPattern = '<div class="video-container"><iframe.+?src="([^<>"]+?)"'
+    sPattern = '<div class="video-container"><iframe.+?data-lazy-src="([^<>"]+?)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
     
     VSlog(aResult)

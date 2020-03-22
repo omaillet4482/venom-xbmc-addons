@@ -8,7 +8,7 @@ from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.comaddon import progress#, VSlog
 from resources.lib.parser import cParser
 from resources.lib.util import cUtil
-import re, urllib, urllib2
+import re, urllib
 
 SITE_IDENTIFIER = 'mesfilms'
 SITE_NAME = 'Mes Films'
@@ -74,7 +74,7 @@ def showSearch():
 
     sSearchText = oGui.showKeyBoard()
     if (sSearchText != False):
-        sUrl = URL_SEARCH[0] + sSearchText.replace(' ', '+')
+        sUrl = URL_SEARCH[0] + urllib.quote(sSearchText)
         showSearchResult(sUrl)
         oGui.setEndOfDirectory()
         return
@@ -165,7 +165,7 @@ def showList():
 def showMovieYears():
     oGui = cGui()
 
-    for i in reversed (xrange(1963, 2019)):
+    for i in reversed (xrange(1963, 2021)):
         Year = str(i)
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('siteUrl', URL_MAIN + 'annee/' + Year + '/')
@@ -200,10 +200,10 @@ def showSearchResult(sSearch = ''):
             sTitle = aEntry[2]
             sDesc = aEntry[3]
 
-            #tris search
-            if sSearch and total > 3:
-                if cUtil().CheckOccurence(sSearch.replace(URL_SEARCH[0], ''), sTitle) == 0:
-                    continue
+#             #tris search
+#             if sSearch and total > 3:
+#                 if cUtil().CheckOccurence(sSearch.replace(URL_SEARCH[0], ''), sTitle) == 0:
+#                     continue
 
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
@@ -229,7 +229,7 @@ def showMovies(sSearch = ''):
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
 
-    sPattern = '<div class="poster"><img src="([^"]+)" alt="([^"]+)".+?(?:|class="quality">([^<]+)<.+?)<a href="([^"]+)"'
+    sPattern = '<div class="poster"><img src="([^"]+)" alt="([^"]+)".+?(?:|class="quality">([^<]+)<.+?)<a href="([^"]+)".+?<span>([^<]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == False):
@@ -248,9 +248,10 @@ def showMovies(sSearch = ''):
             sTitle = aEntry[1]
             sQual = aEntry[2]
             sUrl2 = aEntry[3]
+            sYear = aEntry[4]
             sDesc = ''
 
-            sDisplayTitle = ('%s [%s]') % (sTitle, sQual)
+            sDisplayTitle = ('%s [%s] (%s)') % (sTitle, sQual, sYear)
 
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sUrl2)

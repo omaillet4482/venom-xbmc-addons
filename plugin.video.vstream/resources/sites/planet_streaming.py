@@ -15,7 +15,7 @@ SITE_IDENTIFIER = 'planet_streaming'
 SITE_NAME = 'Planet Streaming'
 SITE_DESC = 'Films en Streaming complet  VF HD'
 
-URL_MAIN = 'https://fr.planet-streaming.net/'
+URL_MAIN = 'https://www.streaming-planet.com/'
 
 MOVIE_MOVIE = (True, 'load')
 MOVIE_NEWS = (URL_MAIN + 'regarder-film/', 'showMovies')
@@ -234,14 +234,12 @@ def showHosters():
 
             if aEntry[0]:
                 oGui.addText(SITE_IDENTIFIER, '[COLOR red]' + aEntry[0] + '[/COLOR]')
+                continue
 
             sHosterUrl = aEntry[1]
             oHoster = cHosterGui().checkHoster(sHosterUrl)
 
             if (oHoster != False):
-                try:
-                    oHoster.setHD(sHosterUrl)
-                except: pass
                 oHoster.setDisplayName(sMovieTitle)
                 oHoster.setFileName(sMovieTitle)
                 cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)

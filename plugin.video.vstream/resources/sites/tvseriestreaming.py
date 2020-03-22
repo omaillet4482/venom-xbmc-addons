@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 #Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
-return False
+
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
@@ -19,7 +19,7 @@ SITE_IDENTIFIER = 'tvseriestreaming'
 SITE_NAME = 'Tv_seriestreaming'
 SITE_DESC = 'Séries & Animés en Streaming'
 
-URL_MAIN = 'https://les.seriestreaming.site/'
+URL_MAIN = 'https://seriestreaminglist.com/'
 
 SERIE_SERIES = ('http://', 'load')
 SERIE_NEWS = (URL_MAIN + 'nouv-episodes', 'showMovies')
@@ -360,10 +360,12 @@ def showLink():
             sHost = re.sub('\..+', '', aEntry[0]).capitalize()
 
             if aEntry[2] == '':
-                sUrl = URL_MAIN + 'link/' + aEntry[3] + '/' + linkid
+                #sUrl = URL_MAIN + 'link/' + aEntry[3] + '/' + linkid
+                sUrl = URL_MAIN + 'll/captcha?hash=' + aEntry[3]
 
             else:
-                sUrl = URL_MAIN + 'links/' + aEntry[3] #ancienne methode du site tjr ok
+                #sUrl = URL_MAIN + 'links/' + aEntry[3] #ancienne methode du site tjr ok
+                sUrl = URL_MAIN + 'll/captcha?hash=' + aEntry[3]
 
 
             sLang = aEntry[1]
@@ -385,8 +387,6 @@ def showHosters():
     sUrl = oInputParameterHandler.getValue('siteUrl')
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
     sThumb = oInputParameterHandler.getValue('sThumb')
-
-    VSlog(sUrl)
     
     oRequest = cRequestHandler(sUrl)
     oRequest.addHeaderEntry('User-Agent', UA)
@@ -394,13 +394,8 @@ def showHosters():
 
     sHtmlContent = oRequest.request()
     oParser = cParser()
-
-    sPattern = '<iframe class="embed-responsive-.+?src=(.+?) *allowfullscreen><\/iframe>'
-    aResult = oParser.parse(sHtmlContent, sPattern)
-    if (aResult[0] == True):
-        sHosterUrl = aResult[1][0]
-    else:
-        sHosterUrl = sHtmlContent #ancienne methode du site tjr ok
+    
+    sHosterUrl = oRequest.getRealUrl()
 
     if sHosterUrl:
         oHoster = cHosterGui().checkHoster(sHosterUrl)
