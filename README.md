@@ -1,6 +1,6 @@
 ## A Propos!
 
-vStream est un addon pour xbmc qui vous permet de visionner en streaming un grand nombre de sources vidéo (comme la télévision, les films, les séries, les mangas, les documentaires, etc..) il vous est même possible de télécharger certaine source, de les mettre en favoris ou de voir la bande annonce. Le tout depuis KODI et 100% Français.
+vStream est un addon pour Kodi qui vous permet de visionner en streaming un grand nombre de sources vidéo (comme la télévision, les films, les séries, les mangas, les documentaires, etc..). Il vous est même possible de télécharger certaines sources, de les mettre en favoris ou de voir la bande annonce. Le tout 100% Français.
 
 ## Tout Savoir!
 
@@ -15,7 +15,7 @@ Installez le zip du repository, pour avoir les mises à jour automatiques ou ins
 
 [![images](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-Repository-blue.svg?style=for-the-badge)](https://github.com/Kodi-vStream/venom-xbmc-addons/releases/tag/0.0.3)
 
-Suite à des bloquages plutôt agressif des FAI, il peut être utile pour vous de changer vos DNS, plus d'infos par exemple sur ce lien: `https://www.numerama.com/tech/208908-comment-changer-ses-dns-ubuntu-macos-windows.html`
+Suite à des blocages plutôt agressif des FAI, il peut être utile pour vous de changer vos DNS, plus d'infos par exemple sur ce lien: `https://www.numerama.com/tech/208908-comment-changer-ses-dns-ubuntu-macos-windows.html`
 
 ## Contribuer!
 

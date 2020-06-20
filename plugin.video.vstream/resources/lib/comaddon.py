@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # https://github.com/Kodi-vStream/venom-xbmc-addons
 
 import xbmcaddon, xbmcgui, xbmc
@@ -40,7 +40,7 @@ class addon(xbmcaddon.Addon):
 
     #deprecier utiliser addons.setSetting et addons.getSetting
     def VSsetting(self, name, value = False):
-        #adons = addon()
+        #addons = addon()
         #use addons.setting('name') pour getsetting
         #use addons.setting('name', 'value) pour setsetting
         if value:
@@ -102,6 +102,9 @@ class dialog(xbmcgui.Dialog):
     def VSerror(self, e):
         return self.notification('vStream', 'Erreur: ' + str(e), xbmcgui.NOTIFICATION_ERROR, 2000), VSlog('Erreur: ' + str(e))
 
+    def VStextView(self, desc, title = "vStream"):
+        dialog = self.textviewer(title, desc)
+        return dialog
 """
 from resources.lib.comaddon import progress
 
@@ -122,7 +125,7 @@ DIALOG2 = None
 
 class empty():
 
-    def VSupdate(self, dialog, total, text = ''):
+    def VSupdate(self, dialog, total, text = '', search = False):
         pass
 
     def iscanceled(self):
@@ -131,16 +134,13 @@ class empty():
     def VSclose(self, dialog):
         pass
 
-    def VSupdatesearch(self, dialog, total, text = ''):
-        pass
-
 class progress(xbmcgui.DialogProgress):
 
     def VScreate(self, title = 'vStream', desc = ''):
         global DIALOG2
 
-        current_window = xbmcgui.getCurrentWindowId()
-        if current_window == 10000:
+        currentWindow = xbmcgui.getCurrentWindowId()
+        if currentWindow == 10000:
             return empty()
 
         if DIALOG2 == None:
@@ -148,25 +148,21 @@ class progress(xbmcgui.DialogProgress):
             VSlog('create dialog')
             DIALOG2 = self
             return self
-        else: return DIALOG2
+        else:
+            return DIALOG2
 
-    def VSupdate(self, dialog, total, text = ''):
-        if window(10101).getProperty('search') == 'true':
+    def VSupdate(self, dialog, total, text = '', search = False):
+        if not search and window(10101).getProperty('search') == 'true':
             return
         global COUNT
         COUNT += 1
         iPercent = int(float(COUNT * 100) / total)
-        dialog.update(iPercent, 'Loading: ' + str(COUNT) + '/' + str(total), text)
+        dialog.update(iPercent, 'Loading: ' + str(COUNT) + '/' + str(total) + " " + text)
 
-    def VSupdatesearch(self, dialog, total, text = ''):
-        global COUNT
-        COUNT += 1
-        iPercent = int(float(COUNT * 100) / total)
-        dialog.update(iPercent, 'Loading: ' + str(COUNT) + '/' + str(total), text)
 
     def VSclose(self, dialog = ''):
         if not dialog and DIALOG2:
-            dialog=DIALOG2
+            dialog = DIALOG2
         if not dialog:
             return
 
@@ -211,10 +207,13 @@ xbmc.log
 
 #xbmc des fonctions pas des class
 def VSlog(e, level = xbmc.LOGDEBUG):
-    #rapelle l'ID de l'addon pour être apeller hors addon
+    #rapelle l'ID de l'addon pour être appelé hors addon
     if (addon('plugin.video.vstream').getSetting('debug') == 'true'):
         level = xbmc.LOGNOTICE
-    return xbmc.log('\t[PLUGIN] vStream: ' + str(e), level)
+    try:
+        xbmc.log('\t[PLUGIN] vStream: ' + str(e), level)
+    except:
+        pass
 
 def VSupdate():
     return xbmc.executebuiltin('Container.Refresh')

@@ -1,5 +1,8 @@
-#-*- coding: utf-8 -*-
-#Vstream https://github.com/Kodi-vStream/venom-xbmc-addons
+# -*- coding: utf-8 -*-
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
+
+import re
+
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
@@ -7,10 +10,11 @@ from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
 from resources.lib.comaddon import progress#, VSlog
+from resources.lib.util import cUtil
 
 SITE_IDENTIFIER = 'streamcomplet'
 SITE_NAME = 'StreamComplet'
-SITE_DESC = 'Streaming Gratuit de 7210 Films Complets en VF.'
+SITE_DESC = 'Les meilleurs films en version française'
 
 URL_MAIN = 'https://www2.stream-complet.me/'
 
@@ -21,6 +25,7 @@ MOVIE_MOVIE = ('http://', 'load')
 URL_SEARCH = (URL_MAIN + 'search/', 'showMovies')
 URL_SEARCH_MOVIES = (URL_SEARCH[0], 'showMovies')
 FUNCTION_SEARCH = 'showMovies'
+
 
 def load():
     oGui = cGui()
@@ -39,6 +44,7 @@ def load():
 
     oGui.setEndOfDirectory()
 
+
 def showSearch():
     oGui = cGui()
 
@@ -49,23 +55,24 @@ def showSearch():
         oGui.setEndOfDirectory()
         return
 
+
 def showGenres():
     oGui = cGui()
 
     liste = []
-    liste.append( ['Action', URL_MAIN + 'films/action/'] )
-    liste.append( ['Animation', URL_MAIN + 'films/animation/'] )
-    liste.append( ['Aventure', URL_MAIN + 'films/aventure/'] )
-    liste.append( ['Comédie', URL_MAIN + 'films/comedie/'] )
-    liste.append( ['Drame', URL_MAIN + 'films/drame/'] )
-    liste.append( ['Fiction', URL_MAIN + 'films/fiction/'] )
-    liste.append( ['Guerre', URL_MAIN + 'films/guerre/'] )
-    liste.append( ['Historique', URL_MAIN + 'films/historique/'] )
-    liste.append( ['Horreur', URL_MAIN + 'films/horreur/'] )
-    liste.append( ['Musique', URL_MAIN + 'films/musical/'] )
-    liste.append( ['Policier', URL_MAIN + 'films/policier/'] )
-    liste.append( ['Romance', URL_MAIN + 'films/romance/'] )
-    liste.append( ['Thriller', URL_MAIN + 'films/thriller/'] )
+    liste.append(['Action', URL_MAIN + 'films/action/'])
+    liste.append(['Animation', URL_MAIN + 'films/animation/'])
+    liste.append(['Aventure', URL_MAIN + 'films/aventure/'])
+    liste.append(['Comédie', URL_MAIN + 'films/comedie/'])
+    liste.append(['Drame', URL_MAIN + 'films/drame/'])
+    liste.append(['Fiction', URL_MAIN + 'films/fiction/'])
+    liste.append(['Guerre', URL_MAIN + 'films/guerre/'])
+    liste.append(['Historique', URL_MAIN + 'films/historique/'])
+    liste.append(['Horreur', URL_MAIN + 'films/horreur/'])
+    liste.append(['Musique', URL_MAIN + 'films/musical/'])
+    liste.append(['Policier', URL_MAIN + 'films/policier/'])
+    liste.append(['Romance', URL_MAIN + 'films/romance/'])
+    liste.append(['Thriller', URL_MAIN + 'films/thriller/'])
 
     for sTitle, sUrl in liste:
 
@@ -75,7 +82,8 @@ def showGenres():
 
     oGui.setEndOfDirectory()
 
-def showMovies(sSearch = ''):
+
+def showMovies(sSearch=''):
     oGui = cGui()
     oParser = cParser()
     if sSearch:
@@ -87,7 +95,7 @@ def showMovies(sSearch = ''):
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
 
-    sPattern = '<a href="([^"]+)"><img src="([^"]+)" alt="([^"]+)".+?<div class="(movies">(.+?)<|arama")'
+    sPattern = '<a href="([^"]+)"><img src="([^"]+)" alt="([^"]+)".+?<div class="(movies">(.+?)<|moviefilm">)'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == False):
@@ -104,10 +112,15 @@ def showMovies(sSearch = ''):
             if (aEntry[0] == '/'):
                 continue
 
-            sUrl = URL_MAIN + aEntry[0]
-            sThumb = URL_MAIN + aEntry[1]
-            sTitle = aEntry[2].replace('en HD','').replace('Voir ','').replace('streaming','').replace('vf et vostfr','')
+            sUrl = URL_MAIN[:-1] + aEntry[0]
+            sThumb = URL_MAIN[:-1] + aEntry[1]
+            sTitle = aEntry[2]
             sYear = aEntry[4]
+
+            #tris search
+            if sSearch and total > 3:
+                if cUtil().CheckOccurence(sSearch.replace(URL_SEARCH[0], ''), sTitle) == 0:
+                    continue
 
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
@@ -123,10 +136,11 @@ def showMovies(sSearch = ''):
         if (sNextPage != False):
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sNextPage)
-            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Next >>>[/COLOR]', oOutputParameterHandler)
+            number = re.search('/([0-9]+)/', sNextPage).group(1)
+            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Page ' + number + ' >>>[/COLOR]', oOutputParameterHandler)
 
-    if not sSearch:
         oGui.setEndOfDirectory()
+
 
 def __checkForNextPage(sHtmlContent):
     sPattern = '<span class="current">.+?<a class="page larger" href="([^"]+)">'
@@ -137,6 +151,7 @@ def __checkForNextPage(sHtmlContent):
         return URL_MAIN + aResult[1][0]
 
     return False
+
 
 def showLinks():
     oGui = cGui()
@@ -178,6 +193,7 @@ def showLinks():
         progress_.VSclose(progress_)
 
     oGui.setEndOfDirectory()
+
 
 def showHosters():
     oGui = cGui()

@@ -1,23 +1,25 @@
-
+# -*- coding: utf-8 -*-
+# https://github.com/Kodi-vStream/venom-xbmc-addons
 from setuptools import setup, find_packages
 
-setup (
-  name = 'vStream',
-  version = '0.1',
-  packages = find_packages(),
 
-  # Declare your packages' dependencies here, for eg:
-  install_requires = ['foo>=3'],
+setup(
+    name = 'vStream',
+    version = '0.1',
+    packages = find_packages(),
 
-  # Fill in these to make your Egg ready for upload to
-  # PyPI
-  author = 'Venom',
-  author_email = '',
+    # Declare your packages' dependencies here, for eg:
+    install_requires = ['foo>=3'],
 
-  summary = 'Just another Python package for the cheese shop',
-  url = '',
-  license = '',
-  long_description= 'Long description of the package',
+    # Fill in these to make your Egg ready for upload to
+    # PyPI
+    author = 'Venom',
+    author_email = '',
 
-  # could also include long_description, download_url, classifiers, etc.
+    summary = 'Just another Python package for the cheese shop',
+    url = '',
+    license = '',
+    long_description = 'Long description of the package',
+
+    # could also include long_description, download_url, classifiers, etc.
 )

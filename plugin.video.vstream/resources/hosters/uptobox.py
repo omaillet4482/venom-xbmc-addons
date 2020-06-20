@@ -1,14 +1,17 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # https://github.com/Kodi-vStream/venom-xbmc-addons
 #
-from resources.lib.handler.premiumHandler import cPremiumHandler
-from resources.lib.handler.requestHandler import cRequestHandler
-from resources.lib.parser import cParser
+import base64
+import re
+
 from resources.hosters.hoster import iHoster
 from resources.lib.comaddon import dialog, VSlog, addon
-import urllib2,urllib,re
+from resources.lib.handler.premiumHandler import cPremiumHandler
+from resources.lib.parser import cParser
+from resources.lib.util import QuoteSafe, Unquote
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:56.0) Gecko/20100101 Firefox/56.0'}
+
 
 class cHoster(iHoster):
 
@@ -20,7 +23,7 @@ class cHoster(iHoster):
         self.stream = True
 
     def getDisplayName(self):
-        return  self.__sDisplayName
+        return self.__sDisplayName
 
     def setDisplayName(self, sDisplayName):
         self.__sDisplayName = sDisplayName + ' [COLOR violet]' + self.__sDisplayName + '[/COLOR]'
@@ -42,15 +45,13 @@ class cHoster(iHoster):
 
     def setUrl(self, sUrl):
         self.__sUrl = str(sUrl)
-        self.__sUrl = self.__sUrl.replace('http://uptobox.com/', '')
-        self.__sUrl = self.__sUrl.replace('https://uptobox.com/', '')
         self.__sUrl = self.__sUrl.replace('iframe/', '')
-        self.__sUrl = 'https://uptobox.com/' + str(self.__sUrl)
+        self.__sUrl = self.__sUrl.replace('http:', 'https:')
 
-    def checkSubtitle(self,sHtmlContent):
+    def checkSubtitle(self, sHtmlContent):
         oParser = cParser()
 
-        #On ne charge les sous titres uniquement si vostfr se trouve dans le titre.
+        # On ne charge les sous titres uniquement si vostfr se trouve dans le titre.
         if not re.search("<h1 class='file-title'>[^<>]+(?:TRUEFRENCH|FRENCH)[^<>]*</h1>", sHtmlContent, re.IGNORECASE):
 
             sPattern = '<track type=[\'"].+?[\'"] kind=[\'"]subtitles[\'"] src=[\'"]([^\'"]+).vtt[\'"] srclang=[\'"].+?[\'"] label=[\'"]([^\'"]+)[\'"]>'
@@ -92,10 +93,10 @@ class cHoster(iHoster):
                 # 0 is ask me, so 1 is uptostream and so on...
                 ret = mDefault - 1
 
-            #mode DL
+            # mode DL
             if ret == 1:
                 self.stream = False
-            #mode stream
+            # mode stream
             elif ret == 0:
                 self.__sUrl = self.__sUrl.replace('uptobox.com/', 'uptostream.com/')
             else:
@@ -111,24 +112,11 @@ class cHoster(iHoster):
         self.stream = True
         self.__sUrl = self.__sUrl.replace('uptobox.com/', 'uptostream.com/')
 
-        oRequest = cRequestHandler(self.__sUrl)
-        sHtmlContent = oRequest.request()
-
-        SubTitle = ''
-        SubTitle = self.checkSubtitle(sHtmlContent)
-
-        if (self.stream):
-            api_call = self.GetMedialinkStreaming(sHtmlContent)
-        else:
-            api_call = self.GetMedialinkDL(sHtmlContent)
-
-        if api_call:
-            if SubTitle:
-                return True, api_call, SubTitle
-            else:
-                return True, api_call
-
-        return False, False
+        # On redirige vers le hoster uptostream
+        from resources.hosters.uptostream import cHoster
+        oHoster = cHoster()
+        oHoster.setUrl(self.__sUrl)
+        return oHoster.__getMediaLinkForGuest()
 
     def __getMediaLinkByPremiumUser(self):
 
@@ -137,7 +125,7 @@ class cHoster(iHoster):
 
         else:
             sHtmlContent = self.oPremiumHandler.GetHtml(self.__sUrl)
-            #compte gratuit ou erreur auth
+            # compte gratuit ou erreur auth
             if 'you can wait' in sHtmlContent or 'time-remaining' in sHtmlContent:
                 VSlog('no premium')
                 return self.__getMediaLinkForGuest()
@@ -162,17 +150,24 @@ class cHoster(iHoster):
 
         oParser = cParser()
 
-        sPattern =  '<a href *=[\'"](?!http:\/\/uptostream.+)([^<>]+?)[\'"] *class=\'big-button-green-flat mt-4 mb-4\''
+        sPattern = '<a href *=[\'"](?!http:\/\/uptostream.+)([^<>]+?)[\'"] *class=\'big-button-green-flat mt-4 mb-4\''
         aResult = oParser.parse(sHtmlContent, sPattern)
 
         if (aResult[0]):
-            return urllib.quote(aResult[1][0], safe=":/")
+            return QuoteSafe(aResult[1][0])
 
         return False
 
     def GetMedialinkStreaming(self, sHtmlContent):
 
         oParser = cParser()
+
+        # Parfois codée
+        sPattern =  "window\.sources = JSON\.parse\(atob\('([^']+)'"
+        aResult = oParser.parse(sHtmlContent, sPattern)
+        if (aResult[0] == True):
+            sHtmlContent = base64.b64decode(aResult[1][0])
+
         sPattern =  'src":[\'"]([^<>\'"]+)[\'"],"type":[\'"][^\'"><]+?[\'"],"label":[\'"]([0-9]+p)[\'"].+?"lang":[\'"]([^\'"]+)'
         aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -190,12 +185,12 @@ class cHoster(iHoster):
                         tmp_qua = tmp_qua + ' (' + aEntry[2] + ')'
                 qua.append(tmp_qua)
 
-            #Si une seule url
+            # Si une seule url
             if len(url) == 1:
                 stream_url = url[0]
-            #si plus de une
+            # si plus de une
             elif len(url) > 1:
-            #tableau qualiter
+            # tableau qualitée
                 select = dialog().VSselectqual(qua, url)
                 if (select):
                     stream_url = select
@@ -204,7 +199,7 @@ class cHoster(iHoster):
             else:
                 return False
 
-            stream_url = urllib.unquote(stream_url)
+            stream_url = Unquote(stream_url)
             if not stream_url.startswith('http'):
                 stream_url = 'http:' + stream_url
 

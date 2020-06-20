@@ -7,6 +7,7 @@ from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
 #from resources.lib.util import cUtil
+from resources.lib.util import Noredirection
 from resources.lib.comaddon import progress, VSlog
 
 import re, urllib2
@@ -16,9 +17,10 @@ SITE_NAME = 'Gum-Gum-Streaming'
 SITE_DESC = 'Animés VF/VOSTFR'
 
 URL_MAIN = 'https://gum-gum-streaming.com/'
+#URL_MAIN = 'https://gum-gum-streaming.co/'  # sans pub
 
+ANIM_ANIMS = (True, 'load')
 ANIM_NEWS = (URL_MAIN, 'showNews')
-ANIM_ANIMS = (URL_MAIN, 'showNews')
 ANIM_VFS = (URL_MAIN + 'vf/', 'showAnimes')
 ANIM_VOSTFRS = (URL_MAIN + 'vostfr/', 'showAnimes')
 ANIM_MOVIES = (URL_MAIN + 'films/', 'showMovies')
@@ -36,11 +38,15 @@ def load():
 
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', ANIM_VOSTFRS[0])
-    oGui.addDir(SITE_IDENTIFIER, ANIM_VOSTFRS[1], 'Animés (VOSTFR) (A/M)', 'vostfr.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, ANIM_VOSTFRS[1], 'Animés (VOSTFR) (A/G)', 'vostfr.png', oOutputParameterHandler)
 
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', 'https://gum-gum-streaming.com/vostfr2/')
-    oGui.addDir(SITE_IDENTIFIER, ANIM_VOSTFRS[1], 'Animés (VOSTFR) (N/Z)', 'vostfr.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, ANIM_VOSTFRS[1], 'Animés (VOSTFR) (H/N)', 'vostfr.png', oOutputParameterHandler)
+
+    oOutputParameterHandler = cOutputParameterHandler()
+    oOutputParameterHandler.addParameter('siteUrl', 'https://gum-gum-streaming.com/vostfr3/')
+    oGui.addDir(SITE_IDENTIFIER, ANIM_VOSTFRS[1], 'Animés (VOSTFR) (O/Z)', 'vostfr.png', oOutputParameterHandler)
 
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', ANIM_MOVIES[0])
@@ -56,8 +62,7 @@ def showNews():
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-
-    sPattern = '<h3 style="color: .+?;">.+? : <a title="([^"]+)" href="(.+?)">.+?</a>'
+    sPattern = '<h3 style="color: .+?;">.+? : <a title="([^"]+)" href="([^"]+)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
@@ -81,8 +86,8 @@ def showNews():
             sTitle = aEntry[0].replace(' VOSTFR', '').replace(' VF', '')
             sDisplayTitle = ('%s (%s)') % (sTitle, sLang)
 
-            filter = re.search('(\d+)-(\d+)', sUrl)
-            if filter:
+            sFilter = re.search('(\d+)-(\d+)', sUrl)
+            if sFilter:
                 continue
 
             oOutputParameterHandler = cOutputParameterHandler()
@@ -101,8 +106,6 @@ def showAnimes():
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-
-    #sPattern = '<h2 style="text-align: center;"><a href="([^"]+)">(.+?)</a>'
     sPattern = 'class="menublocks".+?Synopsis:([^"]+)" *href="([^"]+)">([^<]+)</a>.+?data-lazy-src="([^"]+)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -120,7 +123,7 @@ def showAnimes():
             sThumb = aEntry[3]
 
             #traitement du titre pour compatibilite
-            sTitle = sTitle.replace('(', ' ').replace(')', ' ')#.replace('-', ' ')
+            sTitle = sTitle.replace('(', ' ').replace(')', ' ')
             sTitle = re.sub('([0-9]+) .. ([0-9\?]+)', '\\1-\\2', sTitle)
             sTitle = re.sub('([0-9]+) & ([0-9\?]+)', '\\1-\\2', sTitle)
 
@@ -128,20 +131,19 @@ def showAnimes():
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
 
-            oGui.addTV(SITE_IDENTIFIER, 'showEpisodes', sTitle, 'anim.png', sThumb, sDesc, oOutputParameterHandler)
+            oGui.addAnime(SITE_IDENTIFIER, 'showEpisodes', sTitle, 'animes.png', sThumb, sDesc, oOutputParameterHandler)
         progress_.VSclose(progress_)
     oGui.setEndOfDirectory()
 
 def showEpisodes():
     oGui = cGui()
+    oParser = cParser()
     oInputParameterHandler = cInputParameterHandler()
     sUrl = oInputParameterHandler.getValue('siteUrl')
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
     sHtmlContent = sHtmlContent.replace('><span', '').replace('span></', '')
-
-    oParser = cParser()
     sPattern = '<header class="entry-header">(.+?)<footer class="entry-footer">'
     aResult = oParser.parse(sHtmlContent, sPattern)
     sUsentContent = aResult[1][0]
@@ -152,7 +154,7 @@ def showEpisodes():
     aSynResult = oParser.parse(sUsentContent, sPattern)
     if aSynResult[0]:
         sDesc = aSynResult[1][0]
-        sDesc = sDesc.replace('<br />', '').replace('&#8217;', '\'').replace('&#8230;', '...')
+        sDesc = sDesc.replace('<br />', '').replace('&#8216;', '\'').replace('&#8217;', '\'').replace('&#8230;', '...')
 
     #récupération du poster
     sThumb = ''
@@ -221,8 +223,7 @@ def showMovies():
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-
-    sPattern = '<h2 style="text-align: center;"><a href="([^"]+)">(.+?)</a>'
+    sPattern = 'style="width: 280px;"><h2><a title="Synopsis: (.+?)" href="([^"]+)">([^<]+)<.+?data-lazy-src="([^"]+)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
@@ -233,8 +234,10 @@ def showMovies():
             if progress_.iscanceled():
                 break
 
-            sTitle = aEntry[1]
-            sUrl = aEntry[0]
+            sDesc = aEntry[0]
+            sUrl = aEntry[1]
+            sTitle = aEntry[2]
+            sThumb = aEntry[3]
 
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
@@ -242,7 +245,7 @@ def showMovies():
             if sTitle.lower().find('les films') != -1:
                 oGui.addDir(SITE_IDENTIFIER, 'showMovieList', sTitle, 'sites/gum_gum_streaming_com.png', oOutputParameterHandler)
             else:
-                oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, 'sites/gum_gum_streaming_com.png', '', '', oOutputParameterHandler)
+                oGui.addMovie(SITE_IDENTIFIER, 'showHosters', sTitle, 'sites/gum_gum_streaming_com.png', sThumb, sDesc, oOutputParameterHandler)
 
         progress_.VSclose(progress_)
     oGui.setEndOfDirectory()
@@ -255,7 +258,6 @@ def showMovieList():
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-
     sPattern = '<a title=".+?" href="([^"]+)">(.+?)</a>'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -288,7 +290,7 @@ def showHosters():
     sHtmlContent = oRequestHandler.request()
     sPattern = '<div class="video-container"><iframe.+?data-lazy-src="([^<>"]+?)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
-    
+
     VSlog(aResult)
 
     if 'animedigitalnetwork.fr' in str(aResult[1]):
@@ -303,7 +305,7 @@ def showHosters():
                 sHosterUrl = aEntry
                 if not sHosterUrl.startswith('http'):
                     sHosterUrl = 'http:' + sHosterUrl
-                    
+
                 if 'tinyurl' in sHosterUrl:
                     sHosterUrl = GetTinyUrl(sHosterUrl)
 
@@ -328,7 +330,7 @@ def showHosters():
 def GetTinyUrl(url):
     if not 'tinyurl' in url:
         return url
-    
+
     #Lien deja connu ?
     if '://tinyurl.com/h7c9sr7' in url:
         url = url.replace('://tinyurl.com/h7c9sr7/', '://vidwatch.me/')
@@ -360,14 +362,9 @@ def GetTinyUrl(url):
 
         #VSlog('Decodage lien tinyurl : ' + str(url))
 
-        class NoRedirection(urllib2.HTTPErrorProcessor):
-            def http_response(self, request, response):
-                return response
-            https_response = http_response
-
         headers9 = [('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:56.0) Gecko/20100101 Firefox/56.0'), ('Referer', URL_MAIN)]
 
-        opener = urllib2.build_opener(NoRedirection)
+        opener = Noredirection()
         opener.addheaders = headers9
         reponse = opener.open(url, None, 5)
 
@@ -379,5 +376,5 @@ def GetTinyUrl(url):
             url = reponse.headers['Location']
 
         reponse.close()
-        
+
     return url

@@ -1,13 +1,12 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # https://github.com/Kodi-vStream/venom-xbmc-addons
-#Venom.
+# Venom.
 
-#sLibrary = xbmc.translatePath('special://home/addons/plugin.video.vstream').decode('utf-8')
-#sys.path.append (sLibrary)
+# sLibrary = xbmc.translatePath('special://home/addons/plugin.video.vstream').decode('utf-8')
+# sys.path.append (sLibrary)
 
-from resources.lib.comaddon import addon, progress, dialog, xbmcgui, window, VSlog, xbmc
+from resources.lib.comaddon import addon, progress, dialog, window, VSlog, xbmc, xbmcgui
 from resources.lib.handler.requestHandler import cRequestHandler
-
 import urllib
 import xbmcvfs
 import datetime, time
@@ -23,25 +22,25 @@ SITE_NAME = 'About'
 
 class cAbout:
 
-    #retourne True si les 2 fichiers sont present mais pas avec les memes tailles
+    # retourne True si les 2 fichiers sont present mais pas avec les memes tailles
     def checksize(self, filepath, size):
         try:
-            #f=open(xbmc.translatePath(filepath))
-            #Content = file.read()
-            #file.close()
-            #len(Content)
+            # f=open(xbmc.translatePath(filepath))
+            # Content = file.read()
+            # file.close()
+            # len(Content)
 
             f = xbmcvfs.File(filepath)
             s = f.size()
             f.close()
 
             if s == size:
-                #ok fichier existe et meme taille
+                # ok fichier existe et meme taille
                 return False
-            #fichier existe mais pas la meme taille
+            # fichier existe mais pas la meme taille
             return True
         except:
-            #fichier n'existe pas
+            # fichier n'existe pas
             return False
 
         #au cas ou ....
@@ -51,54 +50,54 @@ class cAbout:
         addons = addon()
         service_time = addons.getSetting('service_time')
         service_version = addons.getSetting('service_version')
-        #service_version = ''
+        # service_version = ''
 
-        #Si pas d'heure indique = premiere install
-        if not (service_time):
-            #On memorise la date d'aujourdhui
+        # Si pas d'heure indique = premiere install
+        if not service_time:
+            # On memorise la date d'aujourdhui
             addons.setSetting('service_time', str(datetime.datetime.now()))
-            #Mais on force la maj avec une date a la con
+            # Mais on force la maj avec une date a la con
             service_time = '2000-09-23 10:59:50.877000'
 
-        if not (service_version):
-            #version de l'addon
+        if not service_version:
+            # version de l'addon
             addons.setSetting('service_version', str(addons.getAddonInfo('version')))
             service_version = addons.getAddonInfo('version')
 
-        #si addon = 0.7.0 et service_version 0.6.35 pas de mise ajour.
-        if (addons.getAddonInfo('version') > service_version):
+        # si addon = 0.7.0 et service_version 0.6.35 pas de mise ajour.
+        if addons.getAddonInfo('version') > service_version:
             addons.setSetting('service_version', str(addons.getAddonInfo('version')))
             service_version = addons.getAddonInfo('version')
 
-        if (service_time):
-            #delay mise a jour
+        if service_time:
+            # delay mise a jour
             time_sleep = datetime.timedelta(hours = 72)
             time_now = datetime.datetime.now()
             time_service = self.__strptime(service_time, '%Y-%m-%d %H:%M:%S.%f')
-            #pour test
-            #if (time_sleep):
-            if (time_now - time_service > time_sleep):
-                #verifier la nouvelle version
+            # pour test
+            # if (time_sleep):
+            if time_now - time_service > time_sleep:
+                # verifier la nouvelle version
 
                 sUrl = 'https://api.github.com/repos/Kodi-vStream/venom-xbmc-addons/releases/latest'
                 oRequestHandler = cRequestHandler(sUrl)
                 sHtmlContent = oRequestHandler.request()
                 result = json.loads(sHtmlContent)
 
-                #pour test
-                #if (result['tag_name']):
-                if (result['tag_name'] > service_version):
+                # pour test
+                # if (result['tag_name']):
+                if result['tag_name'] > service_version:
                     addons.setSetting('service_futur', str(result['tag_name']))
                     addons.setSetting('home_update', str('true'))
                     addons.setSetting('service_time', str(datetime.datetime.now()))
-                    dialog().VSinfo('Mise à jour disponible')
+                    dialog().VSinfo(addons.VSlang(30418))
                 else:
                     addons.setSetting('service_time', str(datetime.datetime.now()))
                     addons.setSetting('home_update', str('false'))
-                    VSlog('Prochaine vérification de MAJ le: ' + str(time_sleep + time_service))
+                    VSlog(addons.VSlang(30048) + str(time_sleep + time_service))
         return
 
-    #bug python
+    # bug python
     def __strptime(self, date, format):
         try:
             date = datetime.datetime.strptime(date, format)
@@ -128,9 +127,9 @@ class cAbout:
             oRequestHandler = cRequestHandler(sUrl)
             sHtmlContent = oRequestHandler.request()
             result += json.loads(sHtmlContent)
-            #filtre trash & _init
-            result = filter(lambda x: x['name']!="trash", result)
-            result = filter(lambda x: x['name']!="__init__.py", result)
+            # filtre trash & _init
+            result = filter(lambda x: x['name'] != "trash", result)
+            result = filter(lambda x: x['name'] != "__init__.py", result)
         except:
             return False
         return result
@@ -139,7 +138,7 @@ class cAbout:
 
         addons = addon()
         dialogs = dialog()
-        if dialogs.VSyesno("Êtes-vous sûr?"):
+        if dialogs.VSyesno(addons.VSlang(30456)):
 
             service_futur = addons.getSetting('service_futur')
             service_version = addons.getSetting('service_version')
@@ -148,20 +147,19 @@ class cAbout:
             if not service_version:
                 return self.getUpdate()
 
-            #result = self.resultGit()
+            # result = self.resultGit()
             sUrl = 'https://api.github.com/repos/Kodi-vStream/venom-xbmc-addons/compare/%s...%s' % (service_version, service_futur)
-            #pour test
-            #sUrl = 'https://api.github.com/repos/Kodi-vStream/venom-xbmc-addons/compare/0.6.3...0.6.31'
+            # pour test
+            # sUrl = 'https://api.github.com/repos/Kodi-vStream/venom-xbmc-addons/compare/0.6.3...0.6.31'
 
             oRequestHandler = cRequestHandler(sUrl)
             sHtmlContent = oRequestHandler.request()
             result = json.loads(sHtmlContent)
 
             progress_ = progress()
-            progress_.VScreate('Update')
+            progress_.VScreate(addons.VSlang(30015))
 
-            addons = addon()
-            #site = ''
+            # site = ''
             sdown = 0
             add = 0
             dell = 0
@@ -171,7 +169,7 @@ class cAbout:
 
             if result:
 
-                #boucle download fichier
+                # boucle download fichier
                 total = len(result['files'])
                 for i in result['files']:
 
@@ -182,57 +180,57 @@ class cAbout:
 
                         try:
                             self.__download(i['raw_url'], rootpath)
-                            #site += 'Add: [B]%s[/B] | Del: [B]%s[/B] | [COLOR green]%s[/COLOR][CR]' % (i['additions'], i['deletions'], i['filename'].encode('utf-8'))
+                            # site += 'Add: [B]%s[/B] | Del: [B]%s[/B] | [COLOR green]%s[/COLOR][CR]' % (i['additions'], i['deletions'], i['filename'].encode('utf-8'))
                             add += i['additions']
                             dell += i['deletions']
                             sdown = sdown + 1
                             schange += i['changes']
                         except:
-                            #site += "[COLOR red]"+i['filename'].encode("utf-8")+"[/COLOR][CR]"
+                            # site += "[COLOR red]" + i['filename'].encode("utf-8") + "[/COLOR][CR]"
                             sdown = sdown + 1
                             pass
 
                 progress_.VSclose(progress_)
 
-                #donner fichier
-                sContent = 'Ajouter (%s) | Supprimer (%s) | Changement (%s) [CR]Fichiers mise à jour %s / %s' %  (add, dell, schange, sdown, total)
+                # données fichiers
+                sContent = 'Ajouter (%s) | Supprimer (%s) | Changement (%s) [CR]Fichiers mise à jour %s / %s' % (add, dell, schange, sdown, total)
                 listitem = xbmcgui.ListItem(label = 'vStream', label2 = sContent)
                 icon = 'special://home/addons/plugin.video.vstream/resources/art/update.png'
                 listitem.setArt({'icon': icon, 'thumb': icon})
                 listitems.append(listitem)
 
-                #boucle commit
+                # boucle commit
                 for i in result['commits']:
                     try:
-                        #text += '[B]%s[/B]: %s[CR]' % (i['commit']['author']['name'], i['commit']['message'].encode('utf-8'))
+                        # text += '[B]%s[/B]: %s[CR]' % (i['commit']['author']['name'], i['commit']['message'].encode('utf-8'))
                         icon = i['author']['avatar_url']
                         login = i['author']['login']
-                        desc = i['commit']['message'].encode("utf-8")
+                        desc = i['commit']['message'].encode('utf-8')
                         listitem = xbmcgui.ListItem(label = login, label2 = desc)
-                        listitem.setArt({'icon' : icon, 'thumb' : icon})
+                        listitem.setArt({'icon': icon, 'thumb': icon})
                     except:
-                        #text += '[B]%s[/B]: nop[CR]' % (i['commit']['author']['name'])
+                        # text += '[B]%s[/B]: nop[CR]' % (i['commit']['author']['name'])
                         listitem = xbmcgui.ListItem(label = 'None', label2 = 'none')
                         pass
                     listitems.append(listitem)
 
-                #sContent = 'Changement (%s) | Fichiers mise à jour %s / %s [CR]' %  (schange, sdown, total)
-                #sContent += '%s' %  (text.encode('utf-8'))
-                #sContent += '%s' %  (site)
+                # sContent = 'Changement (%s) | Fichiers mise à jour %s / %s [CR]' % (schange, sdown, total)
+                # sContent += '%s' % (text.encode('utf-8'))
+                # sContent += '%s' % (site)
 
                 addons.setSetting('service_time', str(datetime.datetime.now()))
                 addons.setSetting('service_version', str(service_futur))
                 addons.setSetting('home_update', str('false'))
 
-                #fin = dialog().VSok(sContent)
-                #fin =  self.TextBoxes(sContent)
+                # fin = dialog().VSok(sContent)
+                # fin = self.TextBoxes(sContent)
                 fin = self.Box(listitems)
         return
 
     def __download(self, WebUrl, RootUrl):
         inf = urllib.urlopen(WebUrl)
         f = xbmcvfs.File(RootUrl, 'w')
-        #save it
+        # save it
         line = inf.read()
         f.write(line)
 
@@ -242,22 +240,24 @@ class cAbout:
         return
 
     def TextBoxes(self, anounce):
+        addons = addon()
         # activate the text viewer window
         xbmc.executebuiltin('ActivateWindow(%d)' % (10147))
         # get window
         win = window(10147)
-        #win.show()
+        # win.show()
         # give window time to initialize
         xbmc.sleep(100)
         # set heading
-        win.getControl(1).setLabel('vStream mise à jour')
+        win.getControl(1).setLabel(addons.VSlang(30013))
         win.getControl(5).setText(anounce)
         while xbmc.getCondVisibility('Window.IsActive(10147)'):
             xbmc.sleep(100)
-        ret = dialog().VSok('Mise à jour terminée')
+        ret = dialog().VSok(addons.VSlang(30014))
         return
 
     def Box(self, listitems):
+        addons = addon()
 
         class XMLDialog(xbmcgui.WindowXMLDialog):
 
@@ -270,7 +270,7 @@ class cAbout:
                 self.container = self.getControl(6)
                 self.button = self.getControl(5)
                 self.getControl(3).setVisible(False)
-                self.getControl(1).setLabel('Mise à jour')
+                self.getControl(1).setLabel(addons.VSlang(30015))
                 self.button.setLabel('OK')
                 self.container.addItems(listitems)
                 self.setFocus(self.container)

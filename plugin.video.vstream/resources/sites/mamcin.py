@@ -1,6 +1,9 @@
-#-*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
+# -*- coding: utf-8 -*-
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 # jordigarnacho
+
+import re
+
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.gui.gui import cGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
@@ -15,13 +18,14 @@ SITE_DESC = 'plus belle la vie, streaming, séries, récent'
 
 URL_MAIN = 'https://www.mamcin.com/'
 
-#FUNCTION_SEARCH = 'showMovies'
+# FUNCTION_SEARCH = 'showMovies'
 
 SERIE_NEWS = (URL_MAIN, 'showMovies')
 SERIE_SERIES = (URL_MAIN, 'showMovies')
-#SERIE_GENRES = (True, 'showGenres')
+# SERIE_GENRES = (True, 'showGenres')
 
-#loader function
+
+# loader function
 def load():
     oGui = cGui()
 
@@ -31,18 +35,20 @@ def load():
 
     oGui.setEndOfDirectory()
 
-#search function
-def showSearch():
-    oGui = cGui()
 
-    sSearchText = oGui.showKeyBoard()
-    if (sSearchText != False):
-        sUrl = URL_SEARCH[0] + sSearchText
-        showMovies(sUrl)
-        oGui.setEndOfDirectory()
-        return
+# search function
+# def showSearch():
+    # oGui = cGui()
 
-#genre definition
+    # sSearchText = oGui.showKeyBoard()
+    # if (sSearchText != False):
+        # sUrl = URL_SEARCH[0] + sSearchText
+        # showMovies(sUrl)
+        # oGui.setEndOfDirectory()
+        # return
+
+
+# genre definition
 def showGenres():
     oGui = cGui()
 
@@ -57,11 +63,12 @@ def showGenres():
 
     oGui.setEndOfDirectory()
 
-#function to extract episodes
-def showMovies(sSearch = ''):
+
+# function to extract episodes
+def showMovies(sSearch=''):
     oGui = cGui()
     if sSearch:
-      sUrl = sSearch
+        sUrl = sSearch
     else:
         oInputParameterHandler = cInputParameterHandler()
         sUrl = oInputParameterHandler.getValue('siteUrl')
@@ -69,7 +76,7 @@ def showMovies(sSearch = ''):
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
 
-    sPattern = '<div class="featured-image"><a href="(.+?)" title="(.+?)"><img width=".+?" height=".+?" src="(.+?)"'
+    sPattern = '<div class="featured-image"><a href="([^"]+)" title="([^"]+)"><img width=".+?" height=".+?" src="([^"]+)"'
 
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
@@ -86,7 +93,7 @@ def showMovies(sSearch = ''):
             if progress_.iscanceled():
                 break
 
-            #first post filter
+            # first post filter
             if (str(aEntry[2]) != "https://www.mamcin.com/wp-content/uploads/2017/10/plus-belle-la-vie-episode-suivant-en-avance.jpg"):
                 sUrl    = aEntry[0]
                 sTitle  = aEntry[1]
@@ -104,15 +111,17 @@ def showMovies(sSearch = ''):
         if (sNextPage != False):
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl', sNextPage)
-            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Next >>>[/COLOR]', oOutputParameterHandler)
+            number = re.search('page/([0-9]+)', sNextPage).group(1)
+            oGui.addNext(SITE_IDENTIFIER, 'showMovies', '[COLOR teal]Page ' + number + ' >>>[/COLOR]', oOutputParameterHandler)
 
     if not sSearch:
         oGui.setEndOfDirectory()
 
-#search the next page
+
+# search the next page
 def __checkForNextPage(sHtmlContent):
     oParser = cParser()
-    sPattern = '<ul class="default-wp-page clearfix"><li class="previous"><a href="(.+?)" >'
+    sPattern = '<ul class="default-wp-page clearfix"><li class="previous"><a href="([^"]+)" >'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
@@ -120,7 +129,8 @@ def __checkForNextPage(sHtmlContent):
 
     return False
 
-#search hosts
+
+# search hosts
 def showHosters():
     oGui = cGui()
     oInputParameterHandler = cInputParameterHandler()
@@ -133,13 +143,13 @@ def showHosters():
 
     oParser = cParser()
 
-    #add dailymotion sources
+    # add dailymotion sources
     sPattern = '<iframe.+?src="(.+?)?logo=0&info=0"'
     aResult = oParser.parse(sHtmlContent, sPattern)
     if (aResult[0] == True):
         for aEntry in aResult[1]:
             if not aEntry.startswith('http'):
-                sHosterUrl = "http:" + aEntry
+                sHosterUrl = 'https:' + aEntry
             else:
                 sHosterUrl = aEntry
             oHoster = cHosterGui().checkHoster(sHosterUrl)
@@ -148,12 +158,14 @@ def showHosters():
                 oHoster.setFileName(sMovieTitle)
                 cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
 
-    #add sendvid sources
-    sPattern = '<source src="(.+?)" type=\'video/mp4\' />'
+    # add sendvid sources
+    sPattern = '<(?:source|iframe) src="(.+?)" width'
     aResult = oParser.parse(sHtmlContent, sPattern)
     if (aResult[0] == True):
         for aEntry in aResult[1]:
             sHosterUrl = aEntry
+            if not sHosterUrl.startswith('http'):
+                sHosterUrl = 'https:' + aEntry
             oHoster = cHosterGui().checkHoster(sHosterUrl)
             if (oHoster != False):
                 oHoster.setDisplayName(sMovieTitle)

@@ -1,12 +1,11 @@
-#-*- coding: utf-8 -*-
-# https://github.com/Kodi-vStream/venom-xbmc-addons
-#Venom.
-from resources.lib.handler.inputParameterHandler import cInputParameterHandler
-# from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
-from resources.lib.comaddon import dialog, VSlog, xbmc
+# -*- coding: utf-8 -*-
+# vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 
-import urllib
 import xbmcvfs
+
+from resources.lib.handler.inputParameterHandler import cInputParameterHandler
+from resources.lib.util import QuotePlus, Unquote
+from resources.lib.comaddon import dialog, addon, VSlog, xbmc
 
 SITE_IDENTIFIER = 'cDb'
 SITE_NAME = 'DB'
@@ -21,16 +20,19 @@ except:
 
 class cDb:
 
-    #os.path.join(self.__oCache,'vstream.db').decode('utf-8')
-    DB = 'special://userdata/addon_data/plugin.video.vstream/vstream.db'
-    #important seul xbmcvfs peux lire le special
-    REALDB = xbmc.translatePath(DB).decode('utf-8')
+    DB = 'special://home/userdata/addon_data/plugin.video.vstream/vstream.db'
+    # important seul xbmcvfs peux lire le special
+    try:
+        REALDB = xbmc.translatePath(DB).decode('utf-8')
+    except AttributeError:
+         REALDB = xbmc.translatePath(DB)
+
     DIALOG = dialog()
+    ADDON = addon()
 
     def __init__(self):
 
         try:
-            #if not os.path.exists(self.cache):
             if not xbmcvfs.exists(self.DB):
                 self.db = sqlite.connect(self.REALDB)
                 self.db.row_factory = sqlite.Row
@@ -38,7 +40,7 @@ class cDb:
                 self._create_tables()
                 return
         except:
-            VSlog('Erreur: Impossible d\'écrire sur %s' % self.REALDB )
+            VSlog('Error: Unable to write to %s' % self.REALDB)
             pass
 
         try:
@@ -46,7 +48,7 @@ class cDb:
             self.db.row_factory = sqlite.Row
             self.dbcur = self.db.cursor()
         except:
-            VSlog('Erreur: Impossible de ce connecter sur %s' % self.REALDB )
+            VSlog('Error: Unable to access to %s' % self.REALDB)
             pass
 
     def __del__(self):
@@ -54,50 +56,94 @@ class cDb:
         try:
             self.dbcur.close()
             self.db.close()
-        except Exception, e:
+        except Exception:
             pass
 
     def _create_tables(self):
 
-        sql_create2 = 'DROP TABLE history'
+        # sql_create2 = 'DROP TABLE history'
 
         ''' Create table '''
-        sql_create = "CREATE TABLE IF NOT EXISTS history ("" addon_id integer PRIMARY KEY AUTOINCREMENT, ""title TEXT, ""disp TEXT, ""icone TEXT, ""isfolder TEXT, ""level TEXT, ""lastwatched TIMESTAMP "", ""UNIQUE(title)"");"
+        sql_create = "CREATE TABLE IF NOT EXISTS history ("\
+                        "addon_id integer PRIMARY KEY AUTOINCREMENT, "\
+                        "title TEXT, "\
+                        "disp TEXT, "\
+                        "icone TEXT, "\
+                        "isfolder TEXT, "\
+                        "level TEXT, "\
+                        "lastwatched TIMESTAMP "", "\
+                        "UNIQUE(title)"\
+                        ");"
         self.dbcur.execute(sql_create)
 
-        sql_create = "CREATE TABLE IF NOT EXISTS resume ("" addon_id integer PRIMARY KEY AUTOINCREMENT, ""title TEXT, ""hoster TEXT, ""point TEXT, ""UNIQUE(title, hoster)"");"
+        sql_create = "CREATE TABLE IF NOT EXISTS resume ("\
+                        "addon_id integer PRIMARY KEY AUTOINCREMENT, "\
+                        "title TEXT, "\
+                        "hoster TEXT, "\
+                        "point TEXT, "\
+                        "UNIQUE(title, hoster)"\
+                        ");"
         self.dbcur.execute(sql_create)
 
-        sql_create = "CREATE TABLE IF NOT EXISTS watched ("" addon_id integer PRIMARY KEY AUTOINCREMENT, ""title TEXT, ""site TEXT, ""UNIQUE(title, site)"");"
+        sql_create = "CREATE TABLE IF NOT EXISTS watched ("\
+                        "addon_id integer PRIMARY KEY AUTOINCREMENT, "\
+                        "title TEXT, "\
+                        "site TEXT, "\
+                        "UNIQUE(title, site)"\
+                        ");"
         self.dbcur.execute(sql_create)
 
-        sql_create = "CREATE TABLE IF NOT EXISTS favorite ("" addon_id integer PRIMARY KEY AUTOINCREMENT, ""title TEXT, ""siteurl TEXT, ""site TEXT, ""fav TEXT, ""cat TEXT, ""icon TEXT, ""fanart TEXT, ""UNIQUE(title, site)"");"
+        sql_create = "CREATE TABLE IF NOT EXISTS favorite ("\
+                        "addon_id integer PRIMARY KEY AUTOINCREMENT, "\
+                        "title TEXT, "\
+                        "siteurl TEXT, "\
+                        "site TEXT, "\
+                        "fav TEXT, "\
+                        "cat TEXT, "\
+                        "icon TEXT, "\
+                        "fanart TEXT, "\
+                        "UNIQUE(title, site)"\
+                        ");"
         self.dbcur.execute(sql_create)
 
-        #sql_create = "DROP TABLE download"
-        #self.dbcur.execute(sql_create)
-
-        sql_create = "CREATE TABLE IF NOT EXISTS download ("" addon_id integer PRIMARY KEY AUTOINCREMENT, ""title TEXT, ""url TEXT, ""path TEXT, ""cat TEXT, ""icon TEXT, ""size TEXT,""totalsize TEXT, ""status TEXT, ""UNIQUE(title, path)"");"
+        sql_create = "CREATE TABLE IF NOT EXISTS download ("\
+                        "addon_id integer PRIMARY KEY AUTOINCREMENT, "\
+                        "title TEXT, "\
+                        "url TEXT, "\
+                        "path TEXT, "\
+                        "cat TEXT, "\
+                        "icon TEXT, "\
+                        "size TEXT,"\
+                        "totalsize TEXT, "\
+                        "status TEXT, "\
+                        "UNIQUE(title, path)"\
+                        ");"
         self.dbcur.execute(sql_create)
 
         VSlog('Table initialized')
 
-    #Ne pas utiliser cette fonction pour les chemins
+    # Ne pas utiliser cette fonction pour les chemins
     def str_conv(self, data):
         if isinstance(data, str):
             # Must be encoded in UTF-8
-            data = data.decode('utf8')
-
+            try:
+                data = data.decode('utf8')
+            except AttributeError:
+                pass
         import unicodedata
         data = unicodedata.normalize('NFKD', data).encode('ascii', 'ignore')
-        data = data.decode('string-escape')#ATTENTION: provoque des bugs pour les chemins a cause du caractere '/'
+        data = data.decode('string-escape')  # ATTENTION: provoque des bugs pour les chemins a cause du caractere '/'
 
         return data
 
+    # ***********************************
+    #   History fonctions
+    # ***********************************
+
     def insert_history(self, meta):
 
-        #title = urllib.unquote(meta['title']).decode('ascii', 'ignore')
-        title = self.str_conv(urllib.unquote(meta['title']))
+        # title = Unquote(meta['title']).decode('ascii', 'ignore')
+        title = self.str_conv(Unquote(meta['title']))
         disp = meta['disp']
         icon = 'icon.png'
 
@@ -106,7 +152,7 @@ class cDb:
             self.dbcur.execute(ex, (title, disp, icon))
             self.db.commit()
             VSlog('SQL INSERT history Successfully')
-        except Exception, e:
+        except Exception as e:
             if 'UNIQUE constraint failed' in e.message:
                 ex = "UPDATE history set title = '%s', disp = '%s', icone= '%s' WHERE title = '%s'" % (title, disp, icon, title)
                 self.dbcur.execute(ex)
@@ -115,90 +161,23 @@ class cDb:
             VSlog('SQL ERROR INSERT')
             pass
 
-    def insert_resume(self, meta):
-        title = self.str_conv(meta['title'])
-        site = urllib.quote_plus(meta['site'])
-        #hoster = meta['hoster']
-        point = meta['point']
-        ex = "DELETE FROM resume WHERE hoster = '%s'" % (site)
-        self.dbcur.execute(ex)
-        ex = 'INSERT INTO resume (title, hoster, point) VALUES (?, ?, ?)'
-        self.dbcur.execute(ex, (title, site, point))
-
-        try:
-            self.db.commit()
-            VSlog('SQL INSERT resume Successfully')
-        except Exception, e:
-            #print ('************* Error attempting to insert into %s cache table: %s ' % (table, e))
-            VSlog('SQL ERROR INSERT')
-            pass
-
-    def insert_watched(self, meta):
-        title = meta['title']
-        if not title:
-            return
-
-        site = urllib.quote_plus(meta['site'])
-        ex = 'INSERT INTO watched (title, site) VALUES (?, ?)'
-        self.dbcur.execute(ex, (title, site))
-        try:
-            self.db.commit()
-            VSlog('SQL INSERT watched Successfully')
-        except Exception, e:
-            #print ('************* Error attempting to insert into %s cache table: %s ' % (table, e))
-            VSlog('SQL ERROR INSERT')
-            pass
-
     def get_history(self):
         sql_select = 'SELECT * FROM history'
 
         try:
             self.dbcur.execute(sql_select)
-            #matchedrow = self.dbcur.fetchone()
+            # matchedrow = self.dbcur.fetchone()
             matchedrow = self.dbcur.fetchall()
             return matchedrow
-        except Exception, e:
-            VSlog('SQL ERROR EXECUTE')
-            return None
-
-    def get_resume(self, meta):
-        title = self.str_conv(meta['title'])
-        site = urllib.quote_plus(meta['site'])
-
-        sql_select = "SELECT * FROM resume WHERE hoster = '%s'" % (site)
-
-        try:
-            self.dbcur.execute(sql_select)
-            #matchedrow = self.dbcur.fetchone()
-            matchedrow = self.dbcur.fetchall()
-            return matchedrow
-        except Exception, e:
-            VSlog('SQL ERROR EXECUTE')
-            return None
-
-    def get_watched(self, meta):
-        title = meta['title']
-        if not title:
-            return None
-
-        sql_select = "SELECT * FROM watched WHERE title = '%s'" % (title)
-
-        try:
-            self.dbcur.execute(sql_select)
-            #matchedrow = self.dbcur.fetchone()
-            matchedrow = self.dbcur.fetchall()
-
-            if matchedrow:
-                return 1
-            return 0
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return None
 
     def del_history(self):
-
+        from resources.lib.gui.gui import cGui
+        oGui = cGui()
         oInputParameterHandler = cInputParameterHandler()
-        if (oInputParameterHandler.exist('searchtext')):
+        if oInputParameterHandler.exist('searchtext'):
             sql_delete = "DELETE FROM history WHERE title = '%s'" % (oInputParameterHandler.getValue('searchtext'))
         else:
             sql_delete = 'DELETE FROM history;'
@@ -206,56 +185,128 @@ class cDb:
         try:
             self.dbcur.execute(sql_delete)
             self.db.commit()
-            self.DIALOG.VSinfo('Historique supprimé')
-            xbmc.executebuiltin('Container.Refresh')
+            self.DIALOG.VSinfo(self.ADDON.VSlang(30041))
+            oGui.updateDirectory()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR DELETE')
             return False, False
 
+    # ***********************************
+    #   Watched fonctions
+    # ***********************************
+
+    def insert_watched(self, meta):
+        title = meta['title']
+        if not title:
+            return
+
+        site = QuotePlus(meta['site'])
+        ex = 'INSERT INTO watched (title, site) VALUES (?, ?)'
+        self.dbcur.execute(ex, (title, site))
+        try:
+            self.db.commit()
+            VSlog('SQL INSERT watched Successfully')
+        except Exception:
+            VSlog('SQL ERROR INSERT')
+            pass
+
+    def get_watched(self, meta):
+        title = meta['title']
+        if not title:
+            return None
+
+        sql_select = "SELECT * FROM watched WHERE title = '%s'" % title
+
+        try:
+            self.dbcur.execute(sql_select)
+            # matchedrow = self.dbcur.fetchone()
+            matchedrow = self.dbcur.fetchall()
+
+            if matchedrow:
+                return 1
+            return 0
+        except Exception:
+            VSlog('SQL ERROR EXECUTE')
+            return None
 
     def del_watched(self, meta):
         title = meta['title']
         if not title:
             return
 
-        sql_select = "DELETE FROM watched WHERE title = '%s'" % (title)
+        sql_select = "DELETE FROM watched WHERE title = '%s'" % title
         try:
             self.dbcur.execute(sql_select)
             self.db.commit()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
+
+    # ***********************************
+    #   Resume fonctions
+    # ***********************************
+
+    def insert_resume(self, meta):
+        title = self.str_conv(meta['title'])
+        site = QuotePlus(meta['site'])
+        # hoster = meta['hoster']
+        point = meta['point']
+        ex = "DELETE FROM resume WHERE hoster = '%s'" % site
+        self.dbcur.execute(ex)
+        ex = 'INSERT INTO resume (title, hoster, point) VALUES (?, ?, ?)'
+        self.dbcur.execute(ex, (title, site, point))
+
+        try:
+            self.db.commit()
+            VSlog('SQL INSERT resume Successfully')
+        except Exception:
+            VSlog('SQL ERROR INSERT')
+            pass
+
+    def get_resume(self, meta):
+        # title = self.str_conv(meta['title'])
+        site = QuotePlus(meta['site'])
+
+        sql_select = "SELECT * FROM resume WHERE hoster = '%s'" % site
+
+        try:
+            self.dbcur.execute(sql_select)
+            # matchedrow = self.dbcur.fetchone()
+            matchedrow = self.dbcur.fetchall()
+            return matchedrow
+        except Exception:
+            VSlog('SQL ERROR EXECUTE')
+            return None
 
     def del_resume(self, meta):
-        site = urllib.quote_plus(meta['site'])
+        site = QuotePlus(meta['site'])
 
-        sql_select = "DELETE FROM resume WHERE hoster = '%s'" % (site)
+        sql_select = "DELETE FROM resume WHERE hoster = '%s'" % site
 
         try:
             self.dbcur.execute(sql_select)
             self.db.commit()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
 
 
-    #***********************************
-    #   Favoris fonctions
-    #***********************************
+    # ***********************************
+    #   Bookmark fonctions
+    # ***********************************
 
-    def insert_favorite(self, meta):
+    def insert_bookmark(self, meta):
 
         title = self.str_conv(meta['title'])
-        siteurl = urllib.quote_plus(meta['siteurl'])
+        siteurl = QuotePlus(meta['siteurl'])
 
         try:
             sIcon = meta['icon'].decode('UTF-8')
         except:
             sIcon = meta['icon']
-
 
         try:
             ex = 'INSERT INTO favorite (title, siteurl, site, fav, cat, icon, fanart) VALUES (?, ?, ?, ?, ?, ?, ?)'
@@ -263,107 +314,66 @@ class cDb:
 
             self.db.commit()
 
-            self.DIALOG.VSinfo('Enregistré avec succès', meta['title'])
+            self.DIALOG.VSinfo(self.ADDON.VSlang(30042), meta['title'])
             VSlog('SQL INSERT favorite Successfully')
-        except Exception, e:
+        except Exception as e:
             if 'UNIQUE constraint failed' in e.message:
-                self.DIALOG.VSinfo('Marque-page déjà présent', meta['title'])
+                self.DIALOG.VSinfo(self.ADDON.VSlang(30043), meta['title'])
             VSlog('SQL ERROR INSERT')
             pass
 
-    def get_favorite(self):
+    def get_bookmark(self):
 
         sql_select = 'SELECT * FROM favorite'
 
         try:
             self.dbcur.execute(sql_select)
-            #matchedrow = self.dbcur.fetchone()
+            # matchedrow = self.dbcur.fetchone()
             matchedrow = self.dbcur.fetchall()
             return matchedrow
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return None
 
-    def del_favorite(self):
-
+    def del_bookmark(self):
+        from resources.lib.gui.gui import cGui
+        oGui = cGui()
         oInputParameterHandler = cInputParameterHandler()
 
-        if (oInputParameterHandler.exist('sCat')):
+        if oInputParameterHandler.exist('sCat'):
             sql_delete = "DELETE FROM favorite WHERE cat = '%s'" % (oInputParameterHandler.getValue('sCat'))
 
-        if(oInputParameterHandler.exist('sMovieTitle')):
+        if oInputParameterHandler.exist('sMovieTitle'):
 
             siteUrl = oInputParameterHandler.getValue('siteUrl')
             sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
-            siteUrl = urllib.quote_plus(siteUrl)
+            siteUrl = QuotePlus(siteUrl)
             title = self.str_conv(sMovieTitle)
             title = title.replace("'", r"''")
             sql_delete = "DELETE FROM favorite WHERE siteurl = '%s' AND title = '%s'" % (siteUrl, title)
 
-        if(oInputParameterHandler.exist('sAll')):
+        if oInputParameterHandler.exist('sAll'):
             sql_delete = 'DELETE FROM favorite;'
 
         try:
             self.dbcur.execute(sql_delete)
             self.db.commit()
-            self.DIALOG.VSinfo('Favoris supprimé')
-            xbmc.executebuiltin('Container.Refresh')
+            self.DIALOG.VSinfo(self.ADDON.VSlang(30044))
+            oGui.updateDirectory()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
 
-#non utiliser ?
-
-    # def writeFavourites(self):
-
-    #     oInputParameterHandler = cInputParameterHandler()
-    #     sTitle = oInputParameterHandler.getValue('sTitle')
-    #     sId = oInputParameterHandler.getValue('sId')
-    #     sUrl = oInputParameterHandler.getValue('siteUrl')
-    #     sFav = oInputParameterHandler.getValue('sFav')
-
-    #     if (oInputParameterHandler.exist('sCat')):
-    #         sCat = oInputParameterHandler.getValue('sCat')
-    #     else:
-    #         sCat = '5'
-
-    #     sUrl = urllib.quote_plus(sUrl)
-    #     fav_db = self.__sFile
-    #     watched = {}
-    #     if not os.path.exists(fav_db):
-    #         file(fav_db, 'w').write('%r' % watched)
-
-    #     if os.path.exists(fav_db):
-    #         watched = eval(open(fav_db).read() )
-    #         watched[sUrl] = watched.get(sUrl) or []
-
-    #         #add to watched
-    #         if not watched[sUrl]:
-    #             #list = [sFav, sUrl];
-    #             watched[sUrl].append(sFav)
-    #             watched[sUrl].append(sId)
-    #             watched[sUrl].append(sTitle)
-    #             watched[sUrl].append(sCat)
-    #         else:
-    #             watched[sUrl][0] = sFav
-    #             watched[sUrl][1] = sId
-    #             watched[sUrl][2] = sTitle
-    #             watched[sUrl][3] = sCat
-
-    #     file(fav_db, 'w').write('%r' % watched)
-    #     cConfig().showInfo('Marque-Page', sTitle)
-        #fav_db.close()
-
-    #***********************************
+    # ***********************************
     #   Download fonctions
-    #***********************************
+    # ***********************************
 
     def insert_download(self, meta):
 
         title = self.str_conv(meta['title'])
-        url = urllib.quote_plus(meta['url'])
-        sIcon = urllib.quote_plus(meta['icon'])
+        url = QuotePlus(meta['url'])
+        sIcon = QuotePlus(meta['icon'])
         sPath = meta['path']
 
         ex = 'INSERT INTO download (title, url, path, cat, icon, size, totalsize, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
@@ -372,25 +382,24 @@ class cDb:
         try:
             self.db.commit()
             VSlog('SQL INSERT download Successfully')
-            self.DIALOG.VSinfo('Enregistré avec succès', meta['title'])
-        except Exception, e:
-            #print ('************* Error attempting to insert into %s cache table: %s ' % (table, e))
+            self.DIALOG.VSinfo(self.ADDON.VSlang(30042), meta['title'])
+        except Exception:
             VSlog('SQL ERROR INSERT')
             pass
 
-    def get_Download(self, meta = ''):
+    def get_download(self, meta=''):
 
         if meta == '':
             sql_select = 'SELECT * FROM download'
         else:
-            url = urllib.quote_plus(meta['url'])
-            sql_select = "SELECT * FROM download WHERE url = '%s' AND status = '0'" % (url)
+            url = QuotePlus(meta['url'])
+            sql_select = "SELECT * FROM download WHERE url = '%s' AND status = '0'" % url
 
         try:
             self.dbcur.execute(sql_select)
             matchedrow = self.dbcur.fetchall()
             return matchedrow
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return None
 
@@ -402,31 +411,31 @@ class cDb:
             self.dbcur.execute(sql_select)
             self.db.commit()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
 
     def reset_download(self, meta):
 
-        url = urllib.quote_plus(meta['url'])
-        sql_select = "UPDATE download SET status = '0' WHERE status = '2' AND url = '%s'" % (url)
+        url = QuotePlus(meta['url'])
+        sql_select = "UPDATE download SET status = '0' WHERE status = '2' AND url = '%s'" % url
 
         try:
             self.dbcur.execute(sql_select)
             self.db.commit()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
 
     def del_download(self, meta):
 
         if len(meta['url']) > 1:
-            url = urllib.quote_plus(meta['url'])
-            sql_select = "DELETE FROM download WHERE url = '%s'" % (url)
+            url = QuotePlus(meta['url'])
+            sql_select = "DELETE FROM download WHERE url = '%s'" % url
         elif len(meta['path']) > 1:
             path = meta['path']
-            sql_select = "DELETE FROM download WHERE path = '%s'" % (path)
+            sql_select = "DELETE FROM download WHERE path = '%s'" % path
         else:
             return
 
@@ -434,17 +443,17 @@ class cDb:
             self.dbcur.execute(sql_select)
             self.db.commit()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
 
-    def Cancel_download(self):
+    def cancel_download(self):
         sql_select = "UPDATE download SET status = '0' WHERE status = '1'"
         try:
             self.dbcur.execute(sql_select)
             self.db.commit()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
 
@@ -461,6 +470,6 @@ class cDb:
             self.dbcur.execute(sql_select)
             self.db.commit()
             return False, False
-        except Exception, e:
+        except Exception:
             VSlog('SQL ERROR EXECUTE')
             return False, False
