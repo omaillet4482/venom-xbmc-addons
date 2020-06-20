@@ -139,6 +139,7 @@
         <setting visible="false" id="plugin_libre_stream_org" type="bool" label="Libre-stream" default="true"/>
 
         <setting visible="false" id="plugin_livetv" type="bool" label="Live TV" default="true"/>
+        <setting visible="false" id="plugin_livetv_DEBUG" type="bool" label="Live TV DEBUG" default="true"/>
 
         <setting visible="false" id="plugin_lsbd" type="bool" label="Liveset Database" default="true"/>
 
