@@ -274,6 +274,8 @@ def showHosters(): #affiche les videos disponible du live
         #url = 'http://www.sporcanli.com/frame2.html' #a garder peut etre utils pour ajouter un hébergeur
 
         VSlog(url)
+        if ('http:' in url) == False :
+            url = 'http:'+url
 
         if 'footballreal.xyz' in url:
             oRequestHandler = cRequestHandler(url)
@@ -1012,6 +1014,7 @@ def showHosters(): #affiche les videos disponible du live
                 if aResult1:
                     sHosterUrl = aResult1[0] + '|User-Agent=' + UA + '&referer=' + url
 
+        VSlog('HOTE ='+ sHosterUrl)
         if sHosterUrl:
             oHoster = cHosterGui().checkHoster("m3u8")
             if (oHoster != False):
