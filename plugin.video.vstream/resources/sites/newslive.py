@@ -10,7 +10,7 @@ from resources.lib.parser import cParser
 from resources.lib.comaddon import progress, VSlog, dialog
 from resources.lib.util import cUtil, Unquote
 import re, base64
-import web_pdb;
+#import web_pdb;
 
 from resources.lib.packer import cPacker
 
