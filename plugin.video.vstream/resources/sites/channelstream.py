@@ -209,7 +209,8 @@ def getRealToken(link, referer, spech):
                'setVolumeSize': '100',
                'NoldoTres': '100'}
 
-    cookies = {'elVolumen': '100'}
+    cookies = {'elVolumen': '100',
+               '__ga':'100'}
 
     headers = {'Host': 'telerium.tv',
                'User-Agent': UA,

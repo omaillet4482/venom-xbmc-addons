@@ -13,7 +13,7 @@ import re, base64
 
 from resources.lib.packer import cPacker
 
-SITE_IDENTIFIER = 'livetv_DEBUG'
+SITE_IDENTIFIER = 'livetv_debug'
 SITE_NAME = 'Live TV DEBUG'
 SITE_DESC = 'Site pour regarder du sport en direct gratuitement'
 
@@ -274,7 +274,7 @@ def showHosters(): #affiche les videos disponible du live
         #url = 'http://www.sporcanli.com/frame2.html' #a garder peut etre utils pour ajouter un hébergeur
 
         VSlog(url)
-        if ('http:' in url) == False :
+        if str(url).startswith('http') == False :
             url = 'http:'+url
 
         if 'footballreal.xyz' in url:
