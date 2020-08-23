@@ -7,7 +7,7 @@ from resources.lib.handler.inputParameterHandler import cInputParameterHandler
 from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.parser import cParser
-from resources.lib.comaddon import progress, VSlog, dialog
+from resources.lib.comaddon import progress, VSlog
 from resources.lib.util import cUtil, Unquote
 import re, base64
 
@@ -118,7 +118,12 @@ def showMovies(sSearch = ''):#affiche les catégories qui ont des lives'
             sUrl2 = URL_MAIN + sUrl2
 
             sTitle = aEntry[1]
-            sTitle = sTitle.decode("iso-8859-1", 'ignore')
+
+            try:
+                sTitle = sTitle.decode("iso-8859-1", 'ignore')
+            except:
+                pass
+
             sTitle = cUtil().unescape(sTitle)
             sTitle = sTitle.encode("utf-8", 'ignore')
 
@@ -163,18 +168,29 @@ def showMovies2(): #affiche les matchs en direct depuis la section showMovie
             #sLang = aEntry[3]
             sQual = aEntry[3]
             sHoster = aEntry[2]
+            
+            try:
+                sTitle2 = sTitle2.decode("iso-8859-1", 'ignore')
+                sHoster = sHoster.decode("iso-8859-1", 'ignore')
+                sQual = sQual.decode("iso-8859-1", 'ignore')
+            except:
+                pass
 
-            sTitle2 = sTitle2.decode("iso-8859-1", 'ignore')
             sTitle2 = cUtil().unescape(sTitle2)
-            sTitle2 = sTitle2.encode("utf-8")
+            sTitle2 = sTitle2.encode("utf-8", 'ignore')
 
-            sHoster = sHoster.decode("iso-8859-1", 'ignore')
             sHoster = cUtil().unescape(sHoster)
-            sHoster = sHoster.encode("utf-8")
+            sHoster = sHoster.encode("utf-8", 'ignore')
 
-            sQual = sQual.decode("iso-8859-1", 'ignore')
             sQual = cUtil().unescape(sQual)
             sQual = sQual.encode("utf-8", 'ignore')
+
+            try:
+                sTitle2 = str(sTitle2, encoding="utf8", errors='ignore')
+                sHoster = str(sHoster, encoding="utf8", errors='ignore')
+                sQual = str(sQual, encoding="utf8", errors='ignore')
+            except:
+                pass
 
             sTitle2 = ('%s (%s) [COLOR yellow]%s[/COLOR]') % (sTitle2, sHoster, sQual)
 
@@ -227,7 +243,8 @@ def showMovies3(): #affiche les videos disponible du live
             #sDesc = ''
 
             sTitle = ('%s') % (sMovieTitle2)
-            sUrl4 = "http:" + sUrl4
+            if (not sUrl4.startswith("http")):
+                sUrl4 = "http:" + sUrl4
 
             oOutputParameterHandler = cOutputParameterHandler()
             oOutputParameterHandler.addParameter('siteUrl4', sUrl4)
@@ -266,6 +283,13 @@ def showHosters(): #affiche les videos disponible du live
 
         VSlog(url)
 
+        if 'espn-live.stream' in url:
+            oRequestHandler = cRequestHandler(url)
+            sHtmlContent2 = oRequestHandler.request()
+            aResult = re.findall(sPattern, sHtmlContent2)
+            if aResult:
+                url = aResult[0]  # redirection vers un autre site
+            
         if 'footballreal.xyz' in url:
             oRequestHandler = cRequestHandler(url)
             sHtmlContent2 = oRequestHandler.request()
@@ -413,7 +437,6 @@ def showHosters(): #affiche les videos disponible du live
                 sHosterUrl = 'http://91.192.80.210/edge0/xrecord/' + str(gameId) + '/prog_index.m3u8'
 
         if 'youtube' in url:#Je sais pas
-            #dialog().VSinfo('Youtube peut ne pas marcher c\'est de la faute de Kodi', "Livetv", 15)
             sPattern2 = 'youtube.com/embed/(.+?)[?]autoplay=1'
             aResult = re.findall(sPattern2, url)
 
@@ -521,8 +544,8 @@ def showHosters(): #affiche les videos disponible du live
 
                 oRequestHandler = cRequestHandler(url)
                 sHtmlContent1 = oRequestHandler.request()
-                sPattern = '<script>fid="(.+?)"'
-                aResult = re.findall(sPattern, sHtmlContent1)
+                sPattern2 = '<script>fid="(.+?)"'
+                aResult = re.findall(sPattern2, sHtmlContent1)
 
                 if aResult:
                     url2 = 'http://wlive.tv/embedra.php?player=desktop&live=' + aResult[0] + '&vw=700&vh=440'
@@ -1049,8 +1072,20 @@ def showMovies4(sSearch = ''):#Afficher le club recherché
             sHoster = aEntry[2]
             sDesc = ''
 
-            sTitle = sTitle.decode("iso-8859-1", 'ignore')
+            try:
+                sTitle = sTitle.decode("iso-8859-1", 'ignore')
+            except:
+                pass
+
             sTitle = sTitle.encode("utf-8", 'ignore')
+
+            try:
+                sTitle2 = str(sTitle2, encoding="utf8", errors='ignore')
+                sHoster = str(sHoster, encoding="utf8", errors='ignore')
+                sQual = str(sQual, encoding="utf8", errors='ignore')
+            except:
+                pass
+
             sTitle = ('%s (%s)') % (sTitle, sHoster)
 
             sUrl2 = URL_MAIN + sUrl2
@@ -1107,8 +1142,20 @@ def showMenu(sSearch = ''):#affiche le menu du club
             #sHoster = aEntry[2]
             sDesc = ''
 
-            sTitle = sTitle.decode("iso-8859-1", 'ignore')
+            try:
+                sTitle = sTitle.decode("iso-8859-1", 'ignore')
+            except:
+                pass
+
             sTitle = sTitle.encode("utf-8", 'ignore')
+
+            try:
+                sTitle2 = str(sTitle2, encoding="utf8", errors='ignore')
+                sHoster = str(sHoster, encoding="utf8", errors='ignore')
+                sQual = str(sQual, encoding="utf8", errors='ignore')
+            except:
+                pass
+
             sTitle = ('%s') % (sTitle)
 
             sUrl2 = URL_MAIN + sUrl2
@@ -1170,21 +1217,34 @@ def showResult(sSearch = ''):# le menu resultat quand on a choisi le club
             #sHoster = aEntry[2]
             sDesc = ''
 
-            sTitle = sTitle.decode("iso-8859-1", 'ignore')
+            try:
+                sTitle = sTitle.decode("iso-8859-1", 'ignore')
+                sDate = sDate.decode("iso-8859-1", 'ignore')
+                sScore = sScore.decode("iso-8859-1", 'ignore')
+                sComp = sComp.decode("iso-8859-1", 'ignore')
+            except:
+                pass
+
             sTitle = cUtil().unescape(sTitle)
             sTitle = sTitle.encode("utf-8", 'ignore')
 
-            sDate = sDate.decode("iso-8859-1", 'ignore')
             sDate = cUtil().unescape(sDate)
             sDate = sDate.encode("utf-8", 'ignore')
 
-            sScore = sScore.decode("iso-8859-1", 'ignore')
             sScore = cUtil().unescape(sScore)
             sScore = sScore.encode("utf-8", 'ignore')
 
-            sComp = sComp.decode("iso-8859-1", 'ignore')
             sComp = cUtil().unescape(sComp)
             sComp = sComp.encode("utf-8", 'ignore')
+
+            try:
+                sTitle = str(sTitle, encoding="utf8", errors='ignore')
+                sDate = str(sDate, encoding="utf8", errors='ignore')
+                sScore = str(sScore, encoding="utf8", errors='ignore')
+                sComp = str(sComp, encoding="utf8", errors='ignore')
+            except:
+                pass
+
             sTitle = ('%s  [%s] (%s) [COLOR]%s[/COLOR]]') % (sTitle, sScore, sDate, sComp)
             sUrl2 = URL_MAIN + sUrl2
 

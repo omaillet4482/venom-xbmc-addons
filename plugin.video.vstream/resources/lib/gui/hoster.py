@@ -9,6 +9,10 @@ from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.player import cPlayer
 from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.comaddon import dialog, addon, VSlog
+import xbmc
+
+ADDON = addon()
+Token_Alldebrid = ADDON.getSetting('token_alldebrid')
 
 
 class cHosterGui:
@@ -112,6 +116,9 @@ class cHosterGui:
 
         # bug
         oGui.addHost(oGuiElement, oOutputParameterHandler)
+        
+            
+        
 
     def checkHoster(self, sHosterUrl):
         # securite
@@ -138,6 +145,13 @@ class cHosterGui:
                 RH = RH.replace('www.', '')
                 tmp.setRealHost(RH.split('.')[0].upper())
                 return tmp
+            
+        # L'user a active alldebrid ?
+            
+        if self.ADDON.getSetting('hoster_alldebrid_premium') == 'true':
+            return self.getHoster('alldebrid')
+            
+                
 
         # Gestion classique
         if ('streamz' in sHostName):
@@ -187,9 +201,10 @@ class cHosterGui:
         if ('uptostream' in sHostName):
             return self.getHoster('uptostream')
         if ('dailymotion' in sHostName) or ('dai.ly' in sHostName):
-            if 'stream' in sHosterUrl:
-                return self.getHoster('lien_direct')
-            else:
+            try:    
+                if 'stream' in sHosterUrl:    
+                    return self.getHoster('lien_direct')    
+            except:    
                 return self.getHoster('dailymotion')
         if ('livestream' in sHostName):
             return self.getHoster('lien_direct')
@@ -336,11 +351,14 @@ class cHosterGui:
             return self.getHoster('frenchvid')
         if ('core1player' in sHostName) or ('vfsplayer' in sHostName):
             return self.getHoster('frenchvid')
-
+        if ('viki' in sHostName):
+            return self.getHoster('viki')
         if ('flix555' in sHostName):
             return self.getHoster('flix555')
-        if ('onlystream' in sHostName) or ('gotochus' in sHostName):
+        if ('onlystream' in sHostName):
             return self.getHoster('onlystream')
+        if ('gotochus' in sHostName):
+            return self.getHoster('gotochus')
         if ('pstream' in sHostName):
             return self.getHoster('pstream')
         if ('vudeo' in sHostName):
@@ -373,12 +391,27 @@ class cHosterGui:
             return self.getHoster('lien_direct')
         if ('cloudhost' in sHostName):
             return self.getHoster('cloudhost')
+        if ('rapidgator' in sHostName):
+            return False
+        if ('turbobit' in sHostName):
+            return False
+        if ('mega.nz' in sHostName) or ('mega.co.nz' in sHostName):
+            return False
+        if ('hitfile' in sHostName):
+            return False
+        if ('myfiles.alldebrid.com' in sHostName):
+            return self.getHoster('lien_direct')
+        if ('dl.free.fr' in sHostName):
+            return False
+        if ('easyload.io' in sHostName):
+            return self.getHoster('easyload')
+            
 
         # Si aucun hebergeur connu on teste les liens directs
-        if (sHosterUrl[-4:] in '.mp4.avi.flv.m3u8.webm'):
+        if (sHosterUrl[-4:] in '.mp4.avi.flv.m3u8.webm.mkv'):
             return self.getHoster('lien_direct')
         # Cas special si parametre apres le lien_direct
-        if (sHosterUrl.split('?')[0][-4:] in '.mp4.avi.flv.m3u8.webm'):
+        if (sHosterUrl.split('?')[0][-4:] in '.mp4.avi.flv.m3u8.webm.mkv'):
             return self.getHoster('lien_direct')
 
         return False

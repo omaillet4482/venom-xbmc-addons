@@ -114,6 +114,9 @@ class cPlayer(xbmc.Player):
             VSlog('Player use setResolvedUrl() method')
 
         #Attend que le lecteur demarre, avec un max de 20s
+        if xbmc.getInfoLabel('system.buildversion')[0:2] >= '19':
+            xrange = range
+
         for _ in xrange(20):
             if self.playBackEventReceived:
                 break
@@ -153,9 +156,9 @@ class cPlayer(xbmc.Player):
         VSlog('Closing player')
 
     #fonction light servant par exmple pour visualiser les DL ou les chaines de TV
-    def startPlayer(self):
+    def startPlayer(self, window=False):
         oPlayList = self.__getPlayList()
-        self.play(oPlayList)
+        self.play(oPlayList, windowed=window)
 
     def onPlayBackEnded(self):
         self.onPlayBackStopped()

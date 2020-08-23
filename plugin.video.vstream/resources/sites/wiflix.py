@@ -16,7 +16,7 @@ SITE_IDENTIFIER = 'wiflix'
 SITE_NAME = 'Wiflix'
 SITE_DESC = 'Films & Séries en streaming'
 
-URL_MAIN = 'https://wuw.wiflix.net/'
+URL_MAIN = 'https://ww7.wiflix.net/'
 
 MOVIE_NEWS = (URL_MAIN + 'film-en-streaming/', 'showMovies')
 MOVIE_MOVIE = (URL_MAIN + 'film-en-streaming/', 'showMovies')
@@ -122,7 +122,7 @@ def showMovies(sSearch=''):
         sUrl = sSearch.replace(' ', '+')
 
         pdata = 'do=search&subaction=search&story=' + sUrl + '&titleonly=3&all_word_seach=1&catlist[]=1'
-        
+
         oRequest = cRequestHandler(URL_SEARCH[0])
         # oRequest.setRequestType(1)
         oRequest.addHeaderEntry('User-Agent', UA)
@@ -134,7 +134,7 @@ def showMovies(sSearch=''):
         oRequest.addParametersLine(pdata)
 
         sHtmlContent = oRequest.request()
-        
+
         # fh = open('c:\\test.txt', "w")
         # fh.write(sHtmlContent)
         # fh.close()
@@ -302,14 +302,7 @@ def sHowEpisodes():
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
-        total = len(aResult[1])
-        progress_ = progress().VScreate(SITE_NAME)
-
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total)
-            if progress_.iscanceled():
-                break
-
             if aEntry[0]:
                 if 'epblocks' in aEntry[0]:
                     continue
@@ -317,14 +310,17 @@ def sHowEpisodes():
                     oGui.addText(SITE_IDENTIFIER, '[COLOR red]' + aEntry[0].replace('ep', 'Episode ').replace('vs', ' Vostfr').replace('vf', ' VF') + '[/COLOR]')
 
             if aEntry[1]:
-                sHosterUrl = aEntry[1]
+                sHosterUrl = aEntry[1].replace('/vd.php?u=', '')
+                if 'players.wiflix.net' in sHosterUrl:
+                    oRequestHandler = cRequestHandler(sHosterUrl)
+                    oRequestHandler.request()
+                    sHosterUrl = oRequestHandler.getRealUrl()
+
                 oHoster = cHosterGui().checkHoster(sHosterUrl)
                 if (oHoster != False):
                     oHoster.setDisplayName(sMovieTitle)
                     oHoster.setFileName(sMovieTitle)
                     cHosterGui().showHoster(oGui, oHoster, sHosterUrl, sThumb)
-
-        progress_.VSclose(progress_)
 
     oGui.setEndOfDirectory()
 
@@ -345,7 +341,12 @@ def showHosters():
     if (aResult[0] == True):
         for aEntry in aResult[1]:
 
-            sHosterUrl = aEntry
+            sHosterUrl = aEntry.replace('/vd.php?u=', '')
+            if 'players.wiflix.net' in sHosterUrl:
+                oRequestHandler = cRequestHandler(sHosterUrl)
+                oRequestHandler.request()
+                sHosterUrl = oRequestHandler.getRealUrl()
+
             oHoster = cHosterGui().checkHoster(sHosterUrl)
             if (oHoster != False):
                 oHoster.setDisplayName(sMovieTitle)
