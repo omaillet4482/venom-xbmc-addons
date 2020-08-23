@@ -124,6 +124,7 @@ class cGui:
         
         # comportement proche de addMisc
         self.addMisc(sId, sFunction, sLabel, sIcon, sThumbnail, sDesc, oOutputParameterHandler, sCat=2)
+        cGui.CONTENT = 'files'
 
     # Meme mode d'affichage qu'un film, avec la description si fournie, mais il n'y a pas de recherche des Métadonnées
     def addMisc(self, sId, sFunction, sLabel, sIcon, sThumbnail, sDesc, oOutputParameterHandler='', sCat=5):
@@ -209,8 +210,7 @@ class cGui:
         oGuiElement.setCat(5)
 
         self.createContexMenuPageSelect(oGuiElement, oOutputParameterHandler)
-        # self.createContexMenuViewBack(oGuiElement, oOutputParameterHandler)
-
+        self.createContexMenuViewBack(oGuiElement, oOutputParameterHandler)
         self.addFolder(oGuiElement, oOutputParameterHandler)
 
     # utiliser oGui.addText(SITE_IDENTIFIER)
@@ -362,8 +362,7 @@ class cGui:
     # affiche les liens playable
     def addHost(self, oGuiElement, oOutputParameterHandler=''):
 
-        if isKrypton():
-            cGui.CONTENT = 'movies'
+        cGui.CONTENT = 'files'
 
         if oOutputParameterHandler.getValue('siteUrl'):
             sSiteUrl = oOutputParameterHandler.getValue('siteUrl')

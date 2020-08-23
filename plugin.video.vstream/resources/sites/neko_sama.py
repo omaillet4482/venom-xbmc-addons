@@ -20,7 +20,7 @@ SITE_DESC = 'anime en streaming'
 
 URL_MAIN = 'https://www.neko-sama.fr/'
 
-URL_SEARCH = (URL_MAIN + 'animes-search.json?gkeorgkeogkccc', 'showSearchResult')
+URL_SEARCH = (URL_MAIN + 'animes-search.json', 'showSearchResult')
 URL_SEARCH_SERIES = (URL_SEARCH[0], 'showSearchResult')
 FUNCTION_SEARCH = 'showSearchResult'
 
@@ -114,7 +114,7 @@ def showSearchResult(sSearch):
     data = json.loads(oRequestHandler.request())
 
     Title, Url, Thumb = parseJson(data, sSearch)
-    total = len(zip(Title, Url, Thumb))
+    total = len(Title)
     progress_ = progress().VScreate(SITE_NAME)
     for title, url, thumb in zip(Title, Url, Thumb):
         progress_.VSupdate(progress_, total)
@@ -131,7 +131,7 @@ def showSearchResult(sSearch):
         oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
         oOutputParameterHandler.addParameter('sThumb', sThumb)
 
-        oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
+        oGui.addAnime(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
 
     progress_.VSclose(progress_)
 
@@ -173,7 +173,7 @@ def showMovies():
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
 
-            oGui.addTV(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
+            oGui.addAnime(SITE_IDENTIFIER, 'ShowSerieSaisonEpisodes', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
 
         progress_.VSclose(progress_)
 
@@ -223,14 +223,7 @@ def ShowSerieSaisonEpisodes():
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
-        total = len(aResult[1])
-        progress_ = progress().VScreate(SITE_NAME)
-
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total)
-            if progress_.iscanceled():
-                break
-
             sTitle = sMovieTitle + ' ' + aEntry[0].replace('Ep. ', 'E')
             sUrl2 = URL_MAIN + aEntry[1].replace('\\/', '/')
             sThumb = aEntry[2]
@@ -240,9 +233,7 @@ def ShowSerieSaisonEpisodes():
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
 
-            oGui.addTV(SITE_IDENTIFIER, 'seriesHosters', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-
-        progress_.VSclose(progress_)
+            oGui.addEpisode(SITE_IDENTIFIER, 'seriesHosters', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 

@@ -420,14 +420,7 @@ def showMoviesLink():
 
     aResult = oParser.parse(sHtmlContent, sPattern)
     if (aResult[0] == True):
-        total = len(aResult[1])
-        progress_ = progress().VScreate(SITE_NAME)
-
         for aEntry, VAR in zip(aResult[1], var):
-            progress_.VSupdate(progress_, total)
-            if progress_.iscanceled():
-                break
-
             sUrl2 = URL_MAIN + url.replace("'+nhash+'", VAR)
             sTitle = ('%s [%s]') % (sMovieTitle, aEntry)
 
@@ -437,9 +430,7 @@ def showMoviesLink():
             oOutputParameterHandler.addParameter('sThumb', sThumb)
             oOutputParameterHandler.addParameter('sCookie', Cookie)
 
-            oGui.addMovie(SITE_IDENTIFIER, 'decryptTime', sTitle, '', sThumb, sDesc, oOutputParameterHandler)
-
-        progress_.VSclose(progress_)
+            oGui.addLink(SITE_IDENTIFIER, 'decryptTime', sTitle, sThumb, sDesc, oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 
@@ -460,18 +451,11 @@ def showSaisonEpisodes():
 
     url = re.search("document\.getElementById\(\'openlink_\'\+n\).href = '(.+?)';", sHtmlContent).group(1)
     oParser = cParser()
-    sPattern = '<span style="margin-left: 20px;">(.+?)</span>|<span style="margin-left: 35px;">(.+?)<.+?<span class="fa arrow">|onmousedown.+?<b>(.+?)</b>.+?var hash_.+?= "(.+?)"'
+    sPattern = '<span style="margin-left: 20px;">(.+?)</span>|<span style="margin-left: 35px;">(.+?)<.+?<span class="fa arrow">|<b>(.+?)</b>.+?var hash_.+?= "(.+?)"'
     aResult = oParser.parse(sHtmlContent, sPattern)
 
     if (aResult[0] == True):
-        total = len(aResult[1])
-        progress_ = progress().VScreate(SITE_NAME)
-
         for aEntry in aResult[1]:
-            progress_.VSupdate(progress_, total)
-            if progress_.iscanceled():
-                break
-
             if aEntry[0]:
                 ses = aEntry[0]
 
@@ -489,9 +473,7 @@ def showSaisonEpisodes():
                 oOutputParameterHandler.addParameter('sDesc', sDesc)
                 oOutputParameterHandler.addParameter('sCookie', Cookie)
 
-                oGui.addTV(SITE_IDENTIFIER, 'decryptTime', sDisplayTitle, '', sThumb, sDesc, oOutputParameterHandler)
-
-        progress_.VSclose(progress_)
+                oGui.addEpisode(SITE_IDENTIFIER, 'decryptTime', sDisplayTitle, '', sThumb, sDesc, oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 
@@ -529,7 +511,6 @@ def decryptTime():
         sPattern = ' <img onclick="choose\(\'([^\']+)\'\).+?src="([^"]+)"'
         aResult = oParser.parse(sHtmlContent, sPattern)
 
-        dialogs = dialog()
         Filename = []
         i = 0
 
@@ -685,8 +666,8 @@ class cInputWindow(xbmcgui.WindowDialog):
         for obj in self.chkbutton:
             self.addControl(obj)
 
-        self.cancelbutton = xbmcgui.ControlButton(450 + 260 - 70, 620, 140, 50, 'Cancel', alignment=2)
-        self.okbutton = xbmcgui.ControlButton(450 + 520 - 50, 620, 100, 50, 'OK', alignment=2)
+        self.cancelbutton = xbmcgui.ControlButton(250 + 260 - 70, 620, 140, 50, 'Cancel', alignment=2)
+        self.okbutton = xbmcgui.ControlButton(250 + 520 - 50, 620, 100, 50, 'OK', alignment=2)
         self.addControl(self.okbutton)
         self.addControl(self.cancelbutton)
 
@@ -726,10 +707,11 @@ class cInputWindow(xbmcgui.WindowDialog):
         self.close()
         if not self.cancelled:
             retval = ""
-            for objn in range(5):
+            for objn in range(9):
                 if self.chkstate[objn]:
                     retval += ("" if retval == "" else ",") + str(objn)
             return retval
+
         else:
             return ""
 
@@ -740,20 +722,19 @@ class cInputWindow(xbmcgui.WindowDialog):
         return False
 
     def onControl(self, control):
-        if str(control.getLabel()) == "OK":
+        if control == self.okbutton:
             if self.anythingChecked():
                 self.close()
-
-        elif str(control.getLabel()) == "Cancel":
+        elif control == self.cancelbutton:
             self.cancelled = True
             self.close()
-
         try:
             if 'xbmcgui.ControlButton' in repr(type(control)):
                 index = control.getLabel()
                 if index.isnumeric():
                     self.chkstate[int(index)-1] = not self.chkstate[int(index)-1]
                     self.chk[int(index)-1].setVisible(self.chkstate[int(index)-1])
+
         except:
             pass
 
