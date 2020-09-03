@@ -144,6 +144,7 @@
 
         <setting visible="false" id="plugin_livetv" type="bool" label="Live TV" default="true"/>
         <setting visible="false" id="plugin_livetv_debug" type="bool" label="Live TV DEBUG" default="true"/>
+        <setting visible="false" id="plugin_newslive" type="bool" label="News live" default="true"/>
 
         <setting visible="false" id="plugin_lsbd" type="bool" label="Liveset Database" default="true"/>
 
