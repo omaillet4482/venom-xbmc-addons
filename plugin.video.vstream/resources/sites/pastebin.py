@@ -10,6 +10,7 @@ from resources.lib.handler.requestHandler import cRequestHandler
 from resources.lib.tmdb import cTMDb
 from resources.lib.util import Quote, cUtil, Unquote
 
+import random
 
 SITE_IDENTIFIER = 'pastebin'
 SITE_NAME = 'PasteBin'
@@ -21,6 +22,7 @@ KEY_PASTE_ID = 'PASTE_ID'
 SETTING_PASTE_ID = 'pastebin_id_'
 SETTING_PASTE_LABEL = 'pastebin_label_'
 UNCLASSIFIED_GENRE = '_NON CLASSÉ_'
+UNCLASSIFIED_RESOLUTION = 'Indéterminé'
 
 URL_SEARCH_MOVIES = (URL_MAIN + KEY_PASTE_ID + '&sMedia=film&sSearch=', 'showSearchGlobal')
 URL_SEARCH_SERIES = (URL_MAIN + KEY_PASTE_ID + '&sMedia=serie&sSearch=', 'showSearchGlobal')
@@ -47,6 +49,7 @@ class PasteBinContent:
     GROUPES = -1  # (optionnel) - Groupes tel que NETFLIX, HBO, MARVEL, DISNEY, Films enfants, ...
     YEAR = -1    # (optionnel) - Année
     GENRES = -1  # (optionnel) - Liste des genres
+    RES = -1     # (optionnel) - Résolution (720p, 1080p, 4K, ...)
     URLS = -1    # Liste des liens, avec épisodes pour les séries
     HEBERGEUR = '' # (optionnel) - URL de l'hebergeur, pour éviter de le mettre dans chaque URL, ex : 'https://uptobox.com/'  
     listeGroupe = {} # (optionnel) - Liste de groupes nommés
@@ -169,6 +172,7 @@ def showMenu():
     containFilmGroupes = False
     containFilmSaga = False
     containFilmYear = False
+    containFilmRes = False
     containSeries = False
     containSerieGroupes = False
     containAnimes = False
@@ -183,6 +187,9 @@ def showMenu():
                 containFilmGroupes = True
             if pbContent.YEAR>=0 and len(movie[pbContent.YEAR].strip())>0:
                 containFilmYear = True
+            if pbContent.RES>=0 and len(movie[pbContent.RES].strip())>0:
+                if movie[pbContent.RES].strip() != '[]':
+                    containFilmRes = True
             if pbContent.SAISON>=0 and len(movie[pbContent.SAISON].strip())>0:
                 containFilmSaga = True
         if 'serie' in movie[pbContent.CAT]:
@@ -225,9 +232,18 @@ def showMenu():
             oOutputParameterHandler.addParameter('siteUrl', sUrl + '&sMedia=film')
             oGui.addDir(SITE_IDENTIFIER, 'showYears', 'Films (Années)', 'annees.png', oOutputParameterHandler)
 
+        if containFilmRes:
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('siteUrl', sUrl + '&sMedia=film')
+            oGui.addDir(SITE_IDENTIFIER, 'showResolution', 'Films (Résolutions)', 'hd.png', oOutputParameterHandler)
+
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('siteUrl', sUrl + '&sMedia=film')
         oGui.addDir(SITE_IDENTIFIER, 'AlphaList', 'Films (Liste)', 'listes.png', oOutputParameterHandler)
+
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter('siteUrl', sUrl + '&sMedia=film&bRandom=True')
+        oGui.addDir(SITE_IDENTIFIER, 'showMovies', 'Films (Aléatoires)', 'news.png', oOutputParameterHandler)
 
 
     if containSeries:
@@ -409,7 +425,7 @@ def showGroupes():
                         groupesPerso.add(gr)
 
     for sGroupe in sorted(groupesPerso):
-        siteUrl = sUrl + '&sMedia=' + sMedia +'&sGroupe=' + sGroupe 
+        siteUrl = sUrl + '&sMedia=' + sMedia +'&sGroupe=' + sGroupe
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('siteUrl', siteUrl)
         oGui.addDir(SITE_IDENTIFIER, 'showMovies', sGroupe, 'genres.png', oOutputParameterHandler)
@@ -447,7 +463,7 @@ def showGroupeDetails():
                         groupes.add(gr)
 
     for sGroupe in sorted(groupes):
-        siteUrl = sUrl + '&sMedia=' + sMedia +'&sGroupe=' + sGroupe 
+        siteUrl = sUrl + '&sMedia=' + sMedia +'&sGroupe=' + sGroupe.replace('+', '|')
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('siteUrl', siteUrl)
         sDisplayGroupe = sGroupe.split(':')[1]
@@ -459,6 +475,8 @@ def showSaga():
     oGui = cGui()
     oInputParameterHandler = cInputParameterHandler()
     sUrl = oInputParameterHandler.getValue('siteUrl')
+    numItem = oInputParameterHandler.getValue('numItem')
+    numPage = oInputParameterHandler.getValue('numPage')
 
     sUrl, params = sUrl.split('&',1)
     aParams = dict(param.split('=') for param in params.split('&'))
@@ -467,25 +485,86 @@ def showSaga():
     else:
         sMedia = 'film'
 
+    if not numItem:
+        numItem = 0
+        numPage = 1
+    numItem = int(numItem)
+    numPage = int(numPage)
+
     oRequestHandler = cRequestHandler(sUrl)
     sContent = oRequestHandler.request()
     pbContent = PasteBinContent()
     movies = pbContent.getLines(sContent)
 
-    sagas = set()
+    sagas = {}
     for movie in movies:
         if pbContent.CAT >=0 and sMedia not in movie[pbContent.CAT]:
             continue
 
         saga = movie[pbContent.SAISON].strip()
         if saga <> '':
-            sagas.add(saga)
+            sTmdbId = name = saga
+            idName = saga.split(':', 1)
+            if len(idName)>1:
+                sTmdbId = idName[0]
+                name = idName[1]
+            if sTmdbId.isdigit():
+                sagas[name] = sTmdbId
+            else:
+                sagas[saga] = saga
             
-    for sSaga in sorted(sagas):
-        siteUrl = sUrl + '&sMedia=' + sMedia +'&sSaga=' + sSaga 
+    nbItem = 0
+    index = 0
+    progress_ = progress().VScreate(SITE_NAME)
+    names = sagas.keys()
+    for sSagaName in sorted(names):
+        
+        # Pagination, on se repositionne
+        index += 1
+        if index <= numItem:
+            continue
+        numItem += 1
+        
+        progress_.VSupdate(progress_, ITEM_PAR_PAGE)
+        if progress_.iscanceled():
+            break
+
+        sTmdbId = sagas[sSagaName]
+
+        siteUrl = sUrl + '&sMedia=' + sMedia
+
         oOutputParameterHandler = cOutputParameterHandler()
+        if sTmdbId.isdigit():
+            oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)    # Utilisé par TMDB
+            siteUrl += '&sSaga=' + sTmdbId + ':' + sSagaName
+        else:
+            siteUrl += '&sSaga=' + sSagaName
         oOutputParameterHandler.addParameter('siteUrl', siteUrl)
-        oGui.addDir(SITE_IDENTIFIER, 'showMovies', sSaga, 'genres.png', oOutputParameterHandler)
+        
+        sDisplaySaga = sSagaName
+        sSagaName = sSagaName.replace('[', '').replace(']', '')   # Exemple pour le film [REC], les crochets sont génant pour certaines fonctions
+        if not sSagaName.lower().endswith('saga'):
+            sSagaName = sSagaName + " Saga"
+        oOutputParameterHandler.addParameter('sMovieTitle', sSagaName)
+        
+        oGui.addMoviePack(SITE_IDENTIFIER, 'showMovies', sDisplaySaga, 'genres.png', '', '', oOutputParameterHandler)
+
+        nbItem += 1
+        if nbItem % ITEM_PAR_PAGE == 0:
+            numPage += 1
+            
+            siteUrl = sUrl
+            if sMedia : siteUrl += '&sMedia=' + sMedia
+            
+            oOutputParameterHandler = cOutputParameterHandler()
+            oOutputParameterHandler.addParameter('siteUrl', siteUrl)
+            oOutputParameterHandler.addParameter('numPage', numPage)
+            oOutputParameterHandler.addParameter('numItem', numItem)
+            oGui.addNext(SITE_IDENTIFIER, 'showSaga', '[COLOR teal]Page ' + str(numPage) + ' >>>[/COLOR]', oOutputParameterHandler)
+            break
+
+
+    progress_.VSclose(progress_)
 
     oGui.setEndOfDirectory()
 
@@ -520,6 +599,48 @@ def showYears():
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('siteUrl', siteUrl)
         oGui.addDir(SITE_IDENTIFIER, 'showMovies', sYear, 'years.png', oOutputParameterHandler)
+
+    oGui.setEndOfDirectory()
+
+
+def showResolution():
+    oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+
+    sUrl, params = sUrl.split('&',1)
+    aParams = dict(param.split('=') for param in params.split('&'))
+    if 'sMedia' in aParams:
+        sMedia = aParams['sMedia']
+    else:
+        sMedia = 'film'
+
+    oRequestHandler = cRequestHandler(sUrl)
+    sContent = oRequestHandler.request()
+    pbContent = PasteBinContent()
+    movies = pbContent.getLines(sContent)
+
+    resolutions = set()
+    for line in movies:
+        if pbContent.CAT >=0 and sMedia not in line[pbContent.CAT]:
+            continue
+
+        res = line[pbContent.RES].strip()
+
+        if '[' in res:
+            if res != '[]':
+                res = eval(res)
+                resolutions = resolutions.union(res)
+        else:
+            resolutions.add(res)
+
+        if not res or res == '[]': resolutions.add(UNCLASSIFIED_RESOLUTION)
+
+    for sRes in sorted(resolutions):
+        siteUrl = sUrl + '&sMedia=' + sMedia +'&sRes=' + sRes 
+        oOutputParameterHandler = cOutputParameterHandler()
+        oOutputParameterHandler.addParameter('siteUrl', siteUrl)
+        oGui.addDir(SITE_IDENTIFIER, 'showMovies', sRes, 'hd.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 
@@ -559,8 +680,9 @@ def showMovies(sSearch=''):
     numItem = oInputParameterHandler.getValue('numItem')
     numPage = oInputParameterHandler.getValue('numPage')
     sMedia = 'film' # Par défaut
-    sGenre = sSaga = sGroupe = sYear = sAlpha = None
-
+    sGenre = sSaga = sGroupe = sYear = sRes = sAlpha = None
+    bRandom = False
+    
     if sSearch:
         sUrl = sSearch
 
@@ -572,8 +694,8 @@ def showMovies(sSearch=''):
 
     sSearchTitle = ''
     
-    # support de l'utilisation du caractere '&' alors qu'il est réservé
-    sUrl = sUrl.replace(' & ', ' | ')
+    # Pour supporter les caracteres '&' et '+' dans les noms alors qu'il sontréservé
+    sUrl = sUrl.replace('+', ' ').replace('|', '+').replace(' & ', ' | ')
     
     sUrl, params = sUrl.split('&',1)
     aParams = dict(param.split('=') for param in params.split('&'))
@@ -581,10 +703,13 @@ def showMovies(sSearch=''):
     if 'sMedia' in aParams: sMedia = aParams['sMedia']
     if 'sSearch' in aParams: sSearchTitle = Unquote(aParams['sSearch']).replace(' | ', ' & ')
     if 'sGenre' in aParams: sGenre = aParams['sGenre'].replace(' | ', ' & ')
-    if 'sSaga' in aParams: sSaga = aParams['sSaga'].replace(' | ', ' & ')
+    if 'sSaga' in aParams:
+        sSaga = aParams['sSaga'].replace(' | ', ' & ')
     if 'sGroupe' in aParams: sGroupe = aParams['sGroupe'].replace(' | ', ' & ')
     if 'sYear' in aParams: sYear = aParams['sYear']
+    if 'sRes' in aParams: sRes = aParams['sRes']
     if 'sAlpha' in aParams: sAlpha = aParams['sAlpha']
+    if 'bRandom' in aParams: bRandom = aParams['bRandom']
 
     oRequestHandler = cRequestHandler(sUrl)
     oRequestHandler.setTimeout(4)
@@ -604,9 +729,20 @@ def showMovies(sSearch=''):
     # Recherche par saga => trie par années
     if sSaga and pbContent.YEAR>=0:
         movies = sorted(movies, key=lambda line: line[pbContent.YEAR])
-        
-        
+
+    # Dans un dossier => trie par années inversées (du plus récent)
+    if sGroupe:
+        movies = sorted(movies, key=lambda line: line[pbContent.YEAR], reverse=True)
+
+    if bRandom:
+        numItem = 0
+        randoms = [random.randint(0, len(movies)) for r in range(ITEM_PAR_PAGE)]
+    
     for movie in movies:
+
+        if bRandom and index not in randoms:
+            index += 1
+            continue
 
         # Pagination, on se repositionne
         index += 1
@@ -677,6 +813,24 @@ def showMovies(sSearch=''):
                     continue
                 sDisplayTitle = '%s (%s)' % (sTitle, year)
 
+        # Filtrage par résolutions vidéos
+        if sRes:
+            if pbContent.RES>=0:
+                res = movie[pbContent.RES].strip()
+
+                if sRes == UNCLASSIFIED_RESOLUTION:
+                    if res and res != '[]':
+                        continue
+                elif res:
+                    if res == '[]':
+                        continue
+                    if '[' in res:
+                        res = eval(res)
+                        if sRes not in res:
+                            continue
+                    elif sRes != res:
+                        continue
+
         nbItem += 1
         progress_.VSupdate(progress_, ITEM_PAR_PAGE)
         if progress_.iscanceled():
@@ -686,6 +840,7 @@ def showMovies(sSearch=''):
         oOutputParameterHandler = cOutputParameterHandler()
         oOutputParameterHandler.addParameter('siteUrl', sUrl)
         
+        sTitle = sTitle.replace('[', '').replace(']', '')   # Exemple pour le film [REC], les crochets sont génant pour certaines fonctions
         oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
         if sTmdbId:
             oOutputParameterHandler.addParameter('sTmdbId', sTmdbId)
@@ -722,7 +877,9 @@ def showMovies(sSearch=''):
                 if sSaga : siteUrl += '&sSaga=' + sSaga
                 if sGroupe : siteUrl += '&sGroupe=' + sGroupe
                 if sYear : siteUrl += '&sYear=' + sYear
+                if sRes : siteUrl += '&sRes=' + sRes
                 if sAlpha : siteUrl += '&sAlpha=' + sAlpha
+                if bRandom : siteUrl += '&bRandom=True'
                 
                 oOutputParameterHandler = cOutputParameterHandler()
                 oOutputParameterHandler.addParameter('siteUrl', siteUrl)
@@ -920,7 +1077,8 @@ def addPasteID():
     # Enregistrer Label/id dans les settings    
     addons.setSetting(settingLabel, sLabel)
     addons.setSetting(settingID, sID)
-
+    
+    oGui.updateDirectory()
 
 # Retirer un lien PasteBin
 def deletePaste():
@@ -950,4 +1108,4 @@ def deletePaste():
             addons.setSetting(idSetting, '')
             break
     
-
+    cGui().updateDirectory()
