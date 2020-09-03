@@ -162,6 +162,20 @@ def WindowsBoxes(sTitle, sFileName, num, year=''):
         except:
             DIALOG.VSok("Veuillez vider le cache des métadonnées Paramètre - outils - 'vider le cache de vStream'")
             pass
+    elif num == '3':
+        try:
+            grab = cTMDb()
+            meta = grab.get_meta('collection', sFileName, '', xbmc.getInfoLabel('ListItem.Property(TmdbId)'))
+        except:
+            DIALOG.VSok("Veuillez vider le cache des métadonnées Paramètre - outils - 'vider le cache de vStream'")
+            pass
+    elif num == '4':
+        try:
+            grab = cTMDb()
+            meta = grab.get_meta('anime', sFileName, '', xbmc.getInfoLabel('ListItem.Property(TmdbId)'))
+        except:
+            DIALOG.VSok("Veuillez vider le cache des métadonnées Paramètre - outils - 'vider le cache de vStream'")
+            pass
         
 
     # si rien ne marche
@@ -176,7 +190,9 @@ def WindowsBoxes(sTitle, sFileName, num, year=''):
     if 'premiered' in meta and meta['premiered']:
         releaseDate = datetime(*(time.strptime(meta['premiered'], '%Y-%m-%d')[0:6]))
         meta['releaseDate'] = releaseDate.strftime('%d/%m/%Y')
-
+    else:
+        meta['releaseDate'] = '-'
+         
     # convertion de la durée en secondes -> heure:minutes
     if 'duration' in meta and meta['duration']:
         duration = meta['duration']/60  # En minutes
@@ -221,47 +237,48 @@ def WindowsBoxes(sTitle, sFileName, num, year=''):
             # synopsis_first
             self.setFocusId(9000)
 
-            # self.getControl(50).reset()
-            listitems = []
-            listitems2 = []
-            cast = []
-            crew = []
+#            self.getControl(50).reset()
             
-            data = eval(str(meta['credits']).decode('utf-8'))
-
-            try:
-                for i in data['cast']:
-                    slabel = i['name']
-                    slabel2 = i['character']
-                    if i['profile_path']:
-                        sicon = self.poster+str(i['profile_path'])
-                    else :
-                        sicon = self.none_poster % slabel
-                    sid = i['id']
-                    listitem_ = listitem(label=slabel, label2=slabel2, iconImage=sicon)
-                    listitem_.setProperty('id', str(sid))
-                    listitems.append(listitem_)
-                    cast.append(slabel.encode('ascii', 'ignore'))
-                self.getControl(50).addItems(listitems)
-            except:
-                pass
-            
-            try:
-                for i in data['crew']:
-                    slabel = i['name']
-                    slabel2 = i['job']
-                    if i['profile_path']:
-                        sicon = self.poster+str(i['profile_path'])
-                    else :
-                        sicon = self.none_poster % slabel
-                    sid = i['id']
-                    listitem_ = listitem(label=slabel, label2=slabel2, iconImage=sicon)
-                    listitem_.setProperty('id', str(sid))
-                    listitems2.append(listitem_)
-                    crew.append(slabel.encode('ascii', 'ignore'))
-                self.getControl(5200).addItems(listitems2)
-            except:
-                pass
+            if 'credits' in meta and meta['credits']:
+                cast = []
+                crew = []
+                data = eval(str(meta['credits']).decode('utf-8'))
+    
+                try:
+                    listitems = []
+                    for i in data['cast']:
+                        slabel = i['name']
+                        slabel2 = i['character']
+                        if i['profile_path']:
+                            sicon = self.poster+str(i['profile_path'])
+                        else :
+                            sicon = self.none_poster % slabel
+                        sid = i['id']
+                        listitem_ = listitem(label=slabel, label2=slabel2, iconImage=sicon)
+                        listitem_.setProperty('id', str(sid))
+                        listitems.append(listitem_)
+                        cast.append(slabel.encode('ascii', 'ignore'))
+                    self.getControl(50).addItems(listitems)
+                except:
+                    pass
+                
+                try:
+                    listitems2 = []
+                    for i in data['crew']:
+                        slabel = i['name']
+                        slabel2 = i['job']
+                        if i['profile_path']:
+                            sicon = self.poster+str(i['profile_path'])
+                        else :
+                            sicon = self.none_poster % slabel
+                        sid = i['id']
+                        listitem_ = listitem(label=slabel, label2=slabel2, iconImage=sicon)
+                        listitem_.setProperty('id', str(sid))
+                        listitems2.append(listitem_)
+                        crew.append(slabel.encode('ascii', 'ignore'))
+                    self.getControl(5200).addItems(listitems2)
+                except:
+                    pass
 
             # try:
             #     for slabel, slabel2, sicon, sid in meta['cast']:
@@ -281,13 +298,18 @@ def WindowsBoxes(sTitle, sFileName, num, year=''):
             # self.getControl(49).setVisible(True)
             # self.getControl(2).setImage(meta['cover_url'])
             # self.getControl(3).setLabel(meta['rating'])
-
+            
+            if 'rating' not in meta or meta['rating'] == 0:
+                meta['rating'] = '-'
+            if 'votes' not in meta or meta['votes'] == '0':
+                meta['votes'] = '-'
+ 
             for e in meta:
-                property = 'ListItem.%s' % (e)
+                prop = 'ListItem.%s' % (e)
                 if isinstance(meta[e], unicode):
-                    window(10000).setProperty(property, meta[e].encode('utf-8'))
+                    window(10000).setProperty(prop, meta[e].encode('utf-8'))
                 else:
-                    window(10000).setProperty(property, str(meta[e]))
+                    window(10000).setProperty(prop, str(meta[e]))
 
         def credit(self, meta='', control=''):
             #self.getControl(control).reset()
