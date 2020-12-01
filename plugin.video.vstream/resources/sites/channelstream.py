@@ -108,14 +108,21 @@ def showHoster():
     sHtmlContent = oRequestHandler.request()
 
     sPattern = '<iframe src="([^"]+)".+?</iframe>'
-    iframeURL1 = oParser.parse(sHtmlContent, sPattern)[1][0]
+    tabUrl = oParser.parse(sHtmlContent, sPattern)
+    if tabUrl[0]:
+            iframeURL1 = tabUrl[1][0]
+    else :
+         sPatternTmp = '<script type=\'text/javascript\'>id=\'([0-9]+)\';'
+         tabUrl = oParser.parse(sHtmlContent, sPatternTmp)
+         iframeURL1 = 'https://telerium.tv/embed/'+tabUrl[1][0]+'.html'
+         
 
     oRequestHandler = cRequestHandler(iframeURL1)
     oRequestHandler.addHeaderEntry('User-Agent', UA)
     oRequestHandler.addHeaderEntry('Referer', iframeURL)
     sHtmlContent2 = oRequestHandler.request()
 
-    sPattern2 = 'var cid = \'([0-9]+)\';'
+    sPattern2 = 'var\s+cid[^\'"]+[\'"]{1}([0-9]+)'
     aResult = re.findall(sPattern2, sHtmlContent2)
     #VSlog(sHtmlContent2)
 

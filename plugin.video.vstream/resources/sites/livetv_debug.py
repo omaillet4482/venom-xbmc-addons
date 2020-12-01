@@ -287,6 +287,13 @@ def showHosters(): #affiche les videos disponible du live
         if str(url).startswith('http') == False :
             url = 'http:'+url
 
+        if 'espn-live.stream' in url:
+            oRequestHandler = cRequestHandler(url)
+            sHtmlContent2 = oRequestHandler.request()
+            aResult = re.findall(sPattern, sHtmlContent2)
+            if aResult:
+                url = aResult[0]  # redirection vers un autre site
+
         if 'footballreal.xyz' in url:
             oRequestHandler = cRequestHandler(url)
             sHtmlContent2 = oRequestHandler.request()
