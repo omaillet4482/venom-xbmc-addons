@@ -205,11 +205,13 @@ def showMovies3(): #affiche les videos disponible du live
     #VSlog(sHtmlContent)
 
     sPattern = '<a title=".+?" *href="(.+?)"'
+    sPatternLang = '<td width=16><img title(="([^"]+)")? width=16'
 
     sPatternType = 't=([A-Za-z0-9]+)&'
     oParser = cParser()
 
     aResult = oParser.parse(sHtmlContent, sPattern)
+    aResultLang = oParser.parse(sHtmlContent, sPatternLang)
 
     if (aResult[0] == False):
         oGui.addText(SITE_IDENTIFIER)
@@ -218,7 +220,7 @@ def showMovies3(): #affiche les videos disponible du live
         total = len(aResult[1])
         progress_ = progress().VScreate(SITE_NAME)
 
-        for aEntry in aResult[1]:
+        for idx, aEntry in enumerate(aResult[1]):
             progress_.VSupdate(progress_, total)
             if progress_.iscanceled():
                 break
@@ -226,7 +228,7 @@ def showMovies3(): #affiche les videos disponible du live
             sTitle = sMovieTitle2
             sUrl4 = aEntry
             sThumb = ''
-            #sLang = aEntry[3]
+            sLang = 'NA'
             #sQual = aEntry[3]
             sHoster = 'NA'
             #sDesc = ''
@@ -234,8 +236,16 @@ def showMovies3(): #affiche les videos disponible du live
             if aResult2:
                 sHoster = aResult2[0]
 
+            if (aResultLang[0] == True):
+                try:
+                    sLang = aResultLang[1][idx][1]
+                    sLang = sLang.decode("iso-8859-1", 'ignore')
+                    sLang = cUtil().unescape(sLang)
+                    sLang = sLang.encode("utf-8")
+                except :
+                    pass
 
-            sTitle = ('[COLOR green]%s[COLOR] - %s') % (sHoster, sMovieTitle2)
+            sTitle = ('[COLOR green]%s[COLOR] - %s - %s') % (sHoster, sMovieTitle2, sLang)
             sUrl4 = "http:" + sUrl4
 
             oOutputParameterHandler = cOutputParameterHandler()
@@ -276,6 +286,13 @@ def showHosters(): #affiche les videos disponible du live
         VSlog(url)
         if str(url).startswith('http') == False :
             url = 'http:'+url
+
+        if 'espn-live.stream' in url:
+            oRequestHandler = cRequestHandler(url)
+            sHtmlContent2 = oRequestHandler.request()
+            aResult = re.findall(sPattern, sHtmlContent2)
+            if aResult:
+                url = aResult[0]  # redirection vers un autre site
 
         if 'footballreal.xyz' in url:
             oRequestHandler = cRequestHandler(url)

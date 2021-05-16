@@ -25,7 +25,7 @@ SITE_IDENTIFIER = 'channelstream'
 SITE_NAME = 'Channel Stream'
 SITE_DESC = 'iptv'
 
-URL_MAIN = 'https://channelstream.me'
+URL_MAIN = 'https://channelstream.watch'
 
 TV_FRENCH = (URL_MAIN + "/chaine-tv.php", 'showMovies')
 
@@ -108,14 +108,21 @@ def showHoster():
     sHtmlContent = oRequestHandler.request()
 
     sPattern = '<iframe src="([^"]+)".+?</iframe>'
-    iframeURL1 = oParser.parse(sHtmlContent, sPattern)[1][0]
+    tabUrl = oParser.parse(sHtmlContent, sPattern)
+    if tabUrl[0]:
+            iframeURL1 = tabUrl[1][0]
+    else :
+         sPatternTmp = '<script type=\'text/javascript\'>id=\'([0-9]+)\';'
+         tabUrl = oParser.parse(sHtmlContent, sPatternTmp)
+         iframeURL1 = 'https://telerium.tv/embed/'+tabUrl[1][0]+'.html'
+         
 
     oRequestHandler = cRequestHandler(iframeURL1)
     oRequestHandler.addHeaderEntry('User-Agent', UA)
     oRequestHandler.addHeaderEntry('Referer', iframeURL)
     sHtmlContent2 = oRequestHandler.request()
 
-    sPattern2 = 'var cid = \'([0-9]+)\';'
+    sPattern2 = 'var\s+cid[^\'"]+[\'"]{1}([0-9]+)'
     aResult = re.findall(sPattern2, sHtmlContent2)
     #VSlog(sHtmlContent2)
 
@@ -126,7 +133,7 @@ def showHoster():
         VSlog(str2)
         datetoken = int(getTimer()) * 1000
         
-        jsonUrl = 'https://telerium.tv/streams/'+str2+'/'+str(datetoken)+'.json'
+        jsonUrl = 'https://telerium.live/streams/'+str2+'/'+str(datetoken)+'.json'
         VSlog(jsonUrl)
         tokens = getRealTokenJson(jsonUrl,iframeURL1)
         m3url = tokens['url']
@@ -180,10 +187,9 @@ def getRealTokenJson(link, referer):
                'setVolumeSize': '100',
                'NoldoTres': '100'}
 
-    cookies = {'elVolumen': '100',
-               '__ga':'100'}
+    cookies = {'volume': '0'}
 
-    headers = {'Host': 'telerium.tv',
+    headers = {'authority': 'telerium.tv',
                'User-Agent': UA,
                'Accept': 'application/json, text/javascript, */*; q=0.01',
                'Accept-Language': 'pl,en-US;q=0.7,en;q=0.3',
