@@ -34,7 +34,7 @@ URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 SPORT_SPORTS = (True, 'load')
 SPORT_TV = ('31-site-pour-regarder-les-chaines-de-sport.html', 'showMovies')
 CHAINE_TV = ('2370162-chaines-tv-streaming-tf1-france-2-canal-plus.html', 'showMovies')
-SPORT_LIVE = (True, 'showMovies')
+SPORT_LIVE = ('/', 'showMovies')
 SPORT_GENRES = (True, 'showGenres')
 
 
