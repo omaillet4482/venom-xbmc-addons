@@ -768,6 +768,10 @@ msgctxt "#30320"
 msgid "You have successfully logged out"
 msgstr "Vous avez été déconnecté avec succès"
 
+msgctxt "#30321"
+msgid "my viewing history"
+msgstr "Mon historique de visionnage"
+
 msgctxt "#30324"
 msgid "Add to media"
 msgstr "Ajouter aux médias"
@@ -809,8 +813,8 @@ msgid "Activate Premium"
 msgstr "Activer Premium"
 
 msgctxt "#30334"
-msgid "Free or Premium Token"
-msgstr "Token Premium ou gratuit"
+msgid "Premium Token"
+msgstr "Token Premium"
 
 msgctxt "#30340"
 msgid "Trakt integration"

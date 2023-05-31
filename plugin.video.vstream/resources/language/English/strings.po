@@ -768,6 +768,10 @@ msgctxt "#30320"
 msgid "You have successfully logged out"
 msgstr ""
 
+msgctxt "#30321"
+msgid "my viewing history"
+msgstr ""
+
 msgctxt "#30324"
 msgid "Add to media"
 msgstr ""
@@ -809,7 +813,7 @@ msgid "Activate Premium"
 msgstr ""
 
 msgctxt "#30334"
-msgid "Free or Premium Token"
+msgid "Premium Token"
 msgstr ""
 
 msgctxt "#30340"

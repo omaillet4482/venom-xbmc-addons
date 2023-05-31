@@ -8,7 +8,7 @@ import re
 import time
 from datetime import datetime, timedelta
 
-from resources.lib.comaddon import siteManager
+from resources.lib.comaddon import siteManager, isMatrix
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
@@ -25,7 +25,23 @@ try:  # Python 2
 except ImportError:  # Python 3
     from urllib.parse import urlparse
 
-URL_MAIN = ''
+UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0'
+
+SITE_IDENTIFIER = 'streamonsport'
+SITE_NAME = 'Streamonsport'
+SITE_DESC = 'Site pour regarder du sport en direct'
+
+SPORT_SPORTS = ('/', 'load')
+TV_TV = ('/', 'load')
+SPORT_TV = ('31-foot-rugby-tennis-basket-f1-moto-hand-en-streaming-direct.html', 'showMovies')
+# CHAINE_CINE = ('2370162-chaines-tv-streaming-tf1-france-2-canal-plus.html', 'showMovies')
+SPORT_LIVE = ('/', 'showMovies')
+SPORT_GENRES = ('/', 'showGenres')
+
+URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
+# URL_MAIN = ''
+
+
 def GetUrlMain():
     global URL_MAIN
     if URL_MAIN != '':
@@ -45,7 +61,7 @@ SITE_DESC = 'Site pour regarder du sport en direct'
 
 SPORT_SPORTS = ('/', 'load')
 TV_TV = ('/', 'load')
-SPORT_TV = ('31-sport-tv-fr-bein-canal-eurosport-prime-video-france-en-streaming.html', 'showMovies')
+SPORT_TV = ('31-site-pour-regarder-les-chaines-de-sport.html', 'showMovies')
 # CHAINE_CINE = ('2370162-chaines-tv-streaming-tf1-france-2-canal-plus.html', 'showMovies')
 SPORT_LIVE = ('/', 'showMovies')
 SPORT_GENRES = ('/', 'showGenres')
@@ -75,12 +91,11 @@ def showGenres():
     oGui = cGui()
     urlMain = GetUrlMain()
 
-    genreURL = '-basketball-streaming-regarder-le-basket-en-streaming.html'
-    genres = [('Basket', '3'), ('Football', '1'), ('Rugby', '2'), ('Tennis', '5')]
-
+    genres = [('Football', '1'), ('Rugby', '2'), ('Basket', '3'), ('Formule 1', '4'), ('Tennis', '5'),
+              ('Handball', '6'), ('Moto', '7')]
     oOutputParameterHandler = cOutputParameterHandler()
     for title, url in genres:
-        sUrl = urlMain + url + genreURL
+        sUrl = urlMain + url + '-foot-rugby-tennis-basket-f1-moto-hand-en-streaming-direct.html'
         oOutputParameterHandler.addParameter('siteUrl', sUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', title)
         oGui.addMisc(SITE_IDENTIFIER, 'showMovies', title, 'genres.png', '', title, oOutputParameterHandler)
@@ -232,7 +247,6 @@ def showLink():
             if aResult[0]:
                 sUrl = aResult[1][0]
 
-    shosterurl = ''
     if 'hola.php' in sUrl:
         urlMain = GetUrlMain()
         sUrl = urlMain + sUrl
@@ -475,7 +489,7 @@ def getTimer():
 def getHosterIframe(url, referer):
 
     if not url.startswith('http'):
-        url = GetUrlMain( )+ url
+        url = GetUrlMain() + url
 
     oRequestHandler = cRequestHandler(url)
     oRequestHandler.addHeaderEntry('Referer', referer)
@@ -573,5 +587,3 @@ def getHosterIframe(url, referer):
         
 
     return False, False
-
-

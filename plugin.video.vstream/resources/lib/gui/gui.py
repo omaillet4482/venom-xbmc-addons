@@ -149,13 +149,13 @@ class cGui:
 
     def addMisc(self, sId, sFunction, sLabel, sIcon, sThumbnail, sDesc, oOutputParameterHandler=''):
         if sThumbnail or sDesc:
-            type = 'videos'
+            cat = 'videos'
         else:
-            type = 'files'
+            cat = 'files'
         movieUrl = oOutputParameterHandler.getValue('siteUrl')
         oOutputParameterHandler.addParameter('movieUrl', QuotePlus(movieUrl))
         oOutputParameterHandler.addParameter('movieFunc', sFunction)
-        return self.addNewDir(type, sId, sFunction, sLabel, sIcon, sThumbnail, sDesc, oOutputParameterHandler, 0, 5)
+        return self.addNewDir(cat, sId, sFunction, sLabel, sIcon, sThumbnail, sDesc, oOutputParameterHandler, 0, 5)
 
     def addMoviePack(self, sId, sFunction, sLabel, sIcon, sThumbnail, sDesc, oOutputParameterHandler=''):
         return self.addNewDir('sets', sId, sFunction, sLabel, sIcon, sThumbnail, sDesc, oOutputParameterHandler, 3, 7)
@@ -766,18 +766,32 @@ class cGui:
         if True:
             # Use vStream database
             oInputParameterHandler = cInputParameterHandler()
-            sSite = oInputParameterHandler.getValue('siteUrl')
-            sTitle = oInputParameterHandler.getValue('sTitleWatched')
+            sSite = oInputParameterHandler.getValue('sId')
+            sSiteUrl = oInputParameterHandler.getValue('siteUrl')
+            sTitle = oInputParameterHandler.getValue('sMovieTitle')
+            sTitleWatched = oInputParameterHandler.getValue('sTitleWatched')
             sCat = oInputParameterHandler.getValue('sCat')
+            sFav = oInputParameterHandler.getValue('sFav')
+            sSeason = oInputParameterHandler.getValue('sSeason')
+            sTmdbId = oInputParameterHandler.getValue('sTmdbId')
+            sSeasonUrl = oInputParameterHandler.getValue('saisonUrl')
+            sSeasonFunc = oInputParameterHandler.getValue('nextSaisonFunc')
+            
             if not sTitle:
                 return
 
             meta = {}
             meta['title'] = sTitle
-            meta['titleWatched'] = sTitle
+            meta['titleWatched'] = sTitleWatched
             meta['site'] = sSite
+            meta['siteurl'] = sSiteUrl
             meta['cat'] = sCat
-
+            meta['fav'] = sFav
+            meta['season'] = sSeason
+            meta['seasonUrl'] = sSeasonUrl
+            meta['seasonFunc'] = sSeasonFunc
+            meta['tmdbId'] = sTmdbId
+             
             from resources.lib.db import cDb
             with cDb() as db:
                 row = db.get_watched(meta)

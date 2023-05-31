@@ -2,7 +2,7 @@
     "sites": {
         "_1seriestreaming": {
             "label": "1 SerieStreaming",
-            "active": "True",
+            "active": "False",
             "url": "https://1seriestreaming.com/"
         },
         "_33seriestreaming": {
@@ -41,7 +41,7 @@
         },
         "asia_insane": {
             "label": "Asia Insane",
-            "active": "True",
+            "active": "False",
             "url": "https://www.asia-insane.biz/"
         },
         "bd_streams": {
@@ -86,7 +86,7 @@
         },
         "ducine": {
             "label": "Du Cin\u00e9",
-            "active": "True",
+            "active": "False",
             "url": "https://www.ducine.site/"
         },
         "enstream": {
@@ -111,7 +111,7 @@
         },
         "filmstreamingy": {
             "label": "FilmstreamingY",
-            "active": "True",
+            "active": "False",
             "url": "https://www.film-streamingk.biz/"
         },
         "free_telechargement_org": {
@@ -172,11 +172,11 @@
         "kepliz_com": {
             "label": "Kepliz",
             "active": "True",
-            "url": "https://www.poblom.com/"
+            "url": "https://morvoz.com/"
         },
         "kstreamingfilm": {
             "label": "K streaming Film",
-            "active": "True",
+            "active": "False",
             "url": "https://kstreamingfilm.xyz/"
         },
         "leet365": {
@@ -201,7 +201,7 @@
         },
         "mamcin": {
             "label": "Mamcin",
-            "active": "True",
+            "active": "False",
             "url": "https://www.mamcin.com/"
         },
         "mesfilms": {
@@ -242,7 +242,7 @@
         "o1streaming": {
             "label": "O1 streaming",
             "active": "True",
-            "url": "https://voir.01streaming.tv/"
+            "url": "https://01streaming.stream/"
         },
         "otaku_attitude": {
             "label": "Otaku-Attitude",
@@ -306,7 +306,7 @@
         },
         "stream_complet": {
             "label": "Stream Complet",
-            "active": "True",
+            "active": "False",
             "url": "https://ww.streamcomplet.click/"
         },
         "streaming_series": {
@@ -327,7 +327,11 @@
         "streamonsport": {
             "label": "Streamonsport",
             "active": "True",
+<<<<<<< HEAD
             "url": "https://www.streamonsport-ldc.top/"
+=======
+            "url": "https://www.streamonsport-live.top/"
+>>>>>>> 8235a33bb2632c468eebf31d1ec1d334f107aef9
         },
         "telecharger_streaming": {
             "label": "T\u00e9l\u00e9charger-streaming",
@@ -356,7 +360,7 @@
         },
         "uptobox_live": {
             "label": "Uptobox Live",
-            "active": "True",
+            "active": "False",
             "url": "https://uptobox.live/"
         },
         "vf_film": {
@@ -397,7 +401,7 @@
         "wawacity": {
             "label": "Wawacity",
             "active": "True",
-            "url": "https://www.wawacity.cloud/"
+            "url": "https://www.wawacity.boo/"
         },
         "wiflix": {
             "label": "WiFlix",
