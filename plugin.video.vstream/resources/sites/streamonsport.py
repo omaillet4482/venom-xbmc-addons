@@ -18,6 +18,8 @@ from resources.lib.packer import cPacker
 from resources.lib.parser import cParser
 from resources.lib.util import Quote
 
+#import web_pdb;
+
 try:  # Python 2
     from urlparse import urlparse
 except ImportError:  # Python 3
@@ -29,12 +31,8 @@ def GetUrlMain():
     if URL_MAIN != '':
         return URL_MAIN
 
-    oRequestHandler = cRequestHandler(siteManager().getUrlMain(SITE_IDENTIFIER))
-    sHtmlContent = oRequestHandler.request()
-
-    sPattern = '<a href="(.+?)"'
-    oParser = cParser()
-    URL_MAIN = oParser.parse(sHtmlContent, sPattern)[1][0]
+    URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
+        
     return URL_MAIN
 
 
@@ -47,7 +45,7 @@ SITE_DESC = 'Site pour regarder du sport en direct'
 
 SPORT_SPORTS = ('/', 'load')
 TV_TV = ('/', 'load')
-SPORT_TV = ('31-site-pour-regarder-les-chaines-de-sport.html', 'showMovies')
+SPORT_TV = ('31-sport-tv-fr-bein-canal-eurosport-prime-video-france-en-streaming.html', 'showMovies')
 # CHAINE_CINE = ('2370162-chaines-tv-streaming-tf1-france-2-canal-plus.html', 'showMovies')
 SPORT_LIVE = ('/', 'showMovies')
 SPORT_GENRES = ('/', 'showGenres')
@@ -211,7 +209,7 @@ def showLink():
     sMovieTitle = oInputParameterHandler.getValue('sMovieTitle')
     siterefer = oInputParameterHandler.getValue('siterefer')
     sHosterUrl = ''
-
+    #web_pdb.set_trace();
     if 'yahoo' in sUrl:  # redirection
         urlMain = GetUrlMain()
         sUrl = urlMain + sUrl
@@ -238,6 +236,16 @@ def showLink():
     if 'hola.php' in sUrl:
         urlMain = GetUrlMain()
         sUrl = urlMain + sUrl
+        oRequestHandler = cRequestHandler(sUrl)
+        oRequestHandler.addHeaderEntry('User-Agent', UA)
+        # oRequestHandler.addHeaderEntry('Referer', siterefer) # a verifier
+        sHtmlContent = oRequestHandler.request()
+        sPattern = '<iframe.+?src="([^"]+)'
+        oParser = cParser()
+        aResult = oParser.parse(sHtmlContent, sPattern)
+        #web_pdb.set_trace();
+        if aResult[0]:
+            sUrl = aResult[1][0]
 
     if 'pkcast123' in sUrl:
         bvalid, shosterurl = Hoster_Pkcast(sUrl, siterefer)
@@ -259,7 +267,7 @@ def showLink():
         if bvalid:
             sHosterUrl = shosterurl
 
-    if 'wigistream' in sUrl or 'cloudstream' in sUrl:
+    if 'wigistream' in sUrl or 'cloudstream' in sUrl or 'go' in sUrl or 'mysportfeeds' in sUrl or 'vecdn' in sUrl:
         bvalid, shosterurl = Hoster_Wigistream(sUrl, siterefer)
         if bvalid:
             sHosterUrl = shosterurl
@@ -523,6 +531,46 @@ def getHosterIframe(url, referer):
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
         return True, aResult[0] + '|referer=' + url
+
+    sPattern = 'return\(\[(.+?)\].join'
+    aResult = re.findall(sPattern, sHtmlContent)
+    if aResult:
+        rawUrlTxt = aResult[0]
+        rawUrlTxt = rawUrlTxt.replace('"','')
+        rawUrlTxt = rawUrlTxt.replace("\\",'')
+        rawUrl = rawUrlTxt.split(',')
+        urlM3u = "".join(rawUrl)
+        return True, urlM3u + '|User-Agent=' + UA +'&Referer=' + url
+
+    sPattern = 'fid="([a-z0-9]+)".+?src="(//gocast2.com/.+?)\.js'
+    aResult = re.findall(sPattern, sHtmlContent)
+    #web_pdb.set_trace();
+    if aResult:
+        rawUrlTxt = aResult[0][1]
+        urlCast='https:'+rawUrlTxt+'.php?player=desktop&live='+aResult[0][0]
+        return getHosterIframe(urlCast, url)
+
+    sPattern = 'ThePlayerJS\((.+?)\);'
+    aResult = re.findall(sPattern, sHtmlContent)
+    #web_pdb.set_trace();
+    if aResult:
+        rawUrlTxt = aResult[0]
+        rawUrlTxt = rawUrlTxt.replace("'",'')
+        rawUrl = rawUrlTxt.split(',')
+        urlCast = 'https://sharecast.ws/player/'+ rawUrl[1]
+        return getHosterIframe(urlCast, url)
+
+    sPattern = 'new Player\((.+?)\);'
+    aResult = re.findall(sPattern, sHtmlContent)
+    #web_pdb.set_trace();
+    if aResult:
+        rawUrlTxt = aResult[0]
+        rawUrl = rawUrlTxt.split(',')
+        rawHostCast = rawUrl[6]
+        hostCast = rawHostCast.split("'")
+        urlCastM3u = 'https://'+ hostCast[1] + '/hls/'+ rawUrl[3].replace('"','') + '/live.m3u8'
+        return True, urlCastM3u + '|User-Agent=' + UA +'&Referer=' + url
+        
 
     return False, False
 
