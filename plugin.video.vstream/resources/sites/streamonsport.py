@@ -525,21 +525,21 @@ def getHosterIframe(url, referer):
         referer = url
         for url in aResult:
             if url.startswith("./"):
-                url = url[1:]
+                urlB = url[1:]
             if not url.startswith("http"):
                 if not url.startswith("//"):
-                    url = '//'+referer.split('/')[2] + url  # ajout du nom de domaine
-                url = "https:" + url
-            b, url = getHosterIframe(url, referer)
+                    urlB = '//'+referer.split('/')[2] + url  # ajout du nom de domaine
+                urlB = "https:" + urlB
+            b, urlB = getHosterIframe(urlB, referer)
             if b:
-                return True, url
+                return True, urlB
 
     sPattern = ';var.+?src=["\']([^"\']+)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
-        url = aResult[0]
-        if '.m3u8' in url:
-            return True, url  # + '|User-Agent=' + UA + '&Referer=' + referer
+        urlB = aResult[0]
+        if '.m3u8' in urlB:
+            return True, urlB  # + '|User-Agent=' + UA + '&Referer=' + referer
 
     sPattern = '[^/]source.+?["\'](https.+?)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
