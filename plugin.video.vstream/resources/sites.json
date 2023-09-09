@@ -327,11 +327,7 @@
         "streamonsport": {
             "label": "Streamonsport",
             "active": "True",
-<<<<<<< HEAD
-            "url": "https://www.streamonsport-ldc.top/"
-=======
-            "url": "https://www.streamonsport-live.top/"
->>>>>>> 8235a33bb2632c468eebf31d1ec1d334f107aef9
+            "url": "https://www.streamonsport.ru/"
         },
         "telecharger_streaming": {
             "label": "T\u00e9l\u00e9charger-streaming",
