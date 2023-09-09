@@ -448,6 +448,23 @@ def Hoster_Laylow(url, referer):
     return Hoster_Pkcast(url, referer)
 
 
+def Hoster_ShareCast(url, referer):
+    oRequestHandler = cRequestHandler(url)
+    oRequestHandler.addHeaderEntry('User-Agent', UA)
+    oRequestHandler.addHeaderEntry('Referer', referer)
+    sHtmlContent = oRequestHandler.request()
+
+    sPattern = "new Player\(.+?player\",\"([^\"]+)\",{'([^\']+)"
+    aResult = re.findall(sPattern, sHtmlContent)
+
+    if aResult:
+        site = 'https://' + aResult[0][1]
+        url = (site + '/hls/' + aResult[0][0]  + '/live.m3u8')
+        return True, url  + '|Referer=' + Quote(site)
+
+    return False, False
+
+
 def getRealTokenJson(link, referer):
 
     realResp = ''
@@ -534,12 +551,33 @@ def getHosterIframe(url, referer):
             if b:
                 return True, urlB
 
+    sPattern = 'player.load\({source: (.+?)\('
+    aResult = re.findall(sPattern, sHtmlContent)
+    if aResult:
+        func = aResult[0]
+        sPattern = 'function %s\(\) +{\n + return\(\[([^\]]+)' % func
+        aResult = re.findall(sPattern, sHtmlContent)
+        if aResult:
+            referer = url
+            sHosterUrl = aResult[0].replace('"', '').replace(',', '').replace('\\', '').replace('////', '//')
+            return True, sHosterUrl + '|referer=' + referer
+
     sPattern = ';var.+?src=["\']([^"\']+)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
         urlB = aResult[0]
         if '.m3u8' in urlB:
             return True, urlB  # + '|User-Agent=' + UA + '&Referer=' + referer
+
+
+    sPattern = "onload=\"ThePlayerJS\('.+?','([^\']+)"
+    aResult = re.findall(sPattern, sHtmlContent)
+    if aResult:
+        url = 'https://sharecast.ws/player/' + aResult[0]
+        b, url = Hoster_ShareCast(url, referer)
+        if b:
+            return True, url
+
 
     sPattern = '[^/]source.+?["\'](https.+?)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
