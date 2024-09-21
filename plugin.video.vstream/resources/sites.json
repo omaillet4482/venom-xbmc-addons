@@ -22,7 +22,7 @@
         "animesultra": {
             "label": "Animes Ultra",
             "active": "True",
-            "url": "https://w3.animesultra.net/"
+            "url": "https://v4.animesultra.net/"
         },
         "bd_streams": {
             "label": "BD STREAMS",
@@ -41,7 +41,7 @@
         },
         "channelstream": {
             "label": "ChannelStream",
-            "active": "True",
+            "active": "False",
             "url": "https://channelstream.es"
         },
         "cinemay_cc": {
@@ -106,7 +106,7 @@
             "label": "Free Telechargement",
             "active": "True",
             "cloudflare": "True",
-            "url": "https://www1.free-telecharger.shop/"
+            "url": "https://www.free-telecharger.world/"
         },
         "freebox": {
             "label": "Freebox",
@@ -121,8 +121,8 @@
         "french_stream_lol": {
             "label": "French-stream-lol",
             "active": "True",
-            "cloudflare": "True",
-            "url": "https://french-stream.moe/"
+            "cloudflare": "False",
+            "url": "https://vvw.french-stream.bio/"
         },
         "frenchanimes": {
             "label": "French Animes",
@@ -174,7 +174,7 @@
             "label": "Mon Stream",
             "active": "True",
             "cloudflare": "True",
-            "url": "https://monstream.app/"
+            "url": "https://monstream.ceo/"
         },
         "mysteriam": {
             "label": "MySteriam",
@@ -189,7 +189,7 @@
         "neymartv": {
             "label": "NeymarTV",
             "active": "True",
-            "url": "https://en.neymartv.net/"
+            "url": "https://v1.neymartv.net/"
         },
         "o1streaming": {
             "label": "O1 streaming",
@@ -248,7 +248,7 @@
         },
         "streamonsport": {
             "label": "Streamonsport",
-            "active": "True",
+            "active": "False",
             "url": "https://www.tv1337.buzz/"
         },
         "themoviedb_org": {
@@ -259,7 +259,7 @@
         "toonanime": {
             "label": "Toonanime",
             "active": "True",
-            "url": "https://v7.toonanime.co/"
+            "url": "https://toonanime.site/"
         },
         "topimdb": {
             "label": "Top IMDB",
@@ -300,13 +300,14 @@
         "wawacity": {
             "label": "Wawacity",
             "active": "True",
+            "cloudflare": "True",
             "url": "https://www.wawacity.tokyo/"
         },
         "wiflix": {
             "label": "WiFlix",
             "active": "True",
             "cloudflare": "True",
-            "url": "https://wiflix-catalogue.com/"
+            "url": "https://wiflix-catalogue.net/"
         },
         "wilifilm": {
             "label": "Wilifilm",

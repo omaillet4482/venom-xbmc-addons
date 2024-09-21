@@ -27,8 +27,8 @@ SITE_DESC = 'Evénements sportifs en direct'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 # URL_MAIN = dans sites.json
 
-SPORT_GENRES = (URL_MAIN + '/frx/allupcoming/', 'showMovies')  # Liste de diffusion des sports
-SPORT_LIVE = (URL_MAIN + '/frx/', 'showLive')  # streaming Actif
+SPORT_GENRES = ('/frx/allupcoming/', 'showMovies')  # Liste de diffusion des sports
+SPORT_LIVE = ('/frx/', 'showLive')  # streaming Actif
 SPORT_SPORTS = (True, 'load')
 
 HEURE_HIVER = False
@@ -49,7 +49,7 @@ def load():
 def showLive():
     oGui = cGui()
     oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
+    sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl')
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
@@ -66,12 +66,13 @@ def showLive():
         for aEntry in aResult[1]:
             sUrl3 = URL_MAIN + aEntry[0]
             heure, canal = aEntry[2].split(':')
+            minute, compet = canal.split('(')
             heure = int(heure)
             if HEURE_HIVER:
                 heure -= 1  # heure d'hiver
                 if heure == -1:
                     heure = 23
-            sTitle2 = '%s %d:%s' % (aEntry[1], heure, canal)
+            sTitle2 = '%d:%s - %s (%s' % (heure, minute, aEntry[1], compet)
             sDisplayTitle = sTitle2
 
             try:
@@ -96,7 +97,7 @@ def showMovies():  # affiche les catégories qui ont des lives'
     oGui = cGui()
 
     oInputParameterHandler = cInputParameterHandler()
-    sUrl = oInputParameterHandler.getValue('siteUrl')
+    sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl')
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
@@ -1358,7 +1359,10 @@ def getHosterIframe(url, referer):
         sstr = aResult[0]
         if not sstr.endswith(';'):
             sstr = sstr + ';'
-        sHtmlContent = cPacker().unpack(sstr)
+        try:
+            sHtmlContent = cPacker().unpack(sstr)
+        except:
+            pass
 
     sPattern = '.atob\("(.+?)"'
     aResult = re.findall(sPattern, sHtmlContent)
@@ -1391,7 +1395,7 @@ def getHosterIframe(url, referer):
                 url = url[1:]
             if not url.startswith("http"):
                 if not url.startswith("//"):
-                    url = '//'+referer.split('/')[2] + url  # ajout du nom de domaine
+                    url = '//'+referer.split('/')[2] + '/' + url # ajout du nom de domaine
                 url = "https:" + url
             url = getHosterIframe(url, referer)
             if url:
