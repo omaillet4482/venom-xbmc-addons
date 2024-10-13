@@ -80,6 +80,11 @@
             "active": "True",
             "url": "https://www.dulourd.uno/"
         },
+        "elitegol": {
+            "label": "Elitegol",
+            "active": "True",
+            "url": "https://elitegol.lat/"
+        },
         "extreme_down": {
             "label": "ExtremeDown",
             "active": "False",
@@ -94,7 +99,7 @@
         },
         "filmsetvideos": {
             "label": "filmsetvideos",
-            "active": "True",
+            "active": "False",
             "url": "https://filmsetvideos.com/"
         },
         "filmspourenfants": {
@@ -181,11 +186,6 @@
             "active": "True",
             "url": "https://www.inmysteriam.fr/"
         },
-        "neko_sama": {
-            "label": "Neko Sama",
-            "active": "True",
-            "url": "https://neko-sama.fr/"
-        },
         "neymartv": {
             "label": "NeymarTV",
             "active": "True",
@@ -213,7 +213,7 @@
         },
         "planet_streaming": {
             "label": "Planet Streaming",
-            "active": "True",
+            "active": "False",
             "url": "https://v2.planet-streaming2.com/"
         },
         "pluto_tv": {
@@ -307,7 +307,7 @@
             "label": "WiFlix",
             "active": "True",
             "cloudflare": "True",
-            "url": "https://wiflix-catalogue.net/"
+            "url": "https://wiflix-catalogue.lol/"
         },
         "wilifilm": {
             "label": "Wilifilm",
