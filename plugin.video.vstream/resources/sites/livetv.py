@@ -27,7 +27,7 @@ SITE_DESC = 'Evénements sportifs en direct'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 # URL_MAIN = dans sites.json
 
-SPORT_GENRES = ('/frx/allupcoming/', 'showMovies')  # Liste de diffusion des sports
+SPORT_GENRES = ('/soccer/', 'showMovies')  # Liste de diffusion des sports
 SPORT_LIVE = ('/frx/', 'showLive')  # streaming Actif
 SPORT_SPORTS = (True, 'load')
 
@@ -101,7 +101,7 @@ def showMovies():  # affiche les catégories qui ont des lives'
 
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-    sPattern = '<a class="main" href="([^"]+)"><b>([^<]+)</b>.+?\s*</td>\s*<td width=.+?>\s*<a class="small" href=".+?"><b>([^<]+)</b></a>'
+    sPattern = '<a class="main"\s*href="([^"]+)"><b>([^<]+)</b>'
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -141,7 +141,7 @@ def showMovies2():  # affiche les matchs en direct depuis la section showMovie
     oRequestHandler = cRequestHandler(sUrl2)
     sHtmlContent = oRequestHandler.request()
 
-    sPattern = '<a class="live" href="([^"]+)">([^<]+)</a>\s*(<br><img src=".+?/img/live.gif"><br>|<br>)\s*<span class="evdesc">([^<]+)\s*<br>\s*([^<]+)</span>'
+    sPattern = '<a class="live" href="([^"]+)">([^<]+)</a>\s*(<br><img src=".*?/img/live.gif"><br>|<br>)\s*<span class="evdesc">([^<]+)\s*<br>\s*([^<]+)</span>'
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -155,7 +155,8 @@ def showMovies2():  # affiche les matchs en direct depuis la section showMovie
             sThumb = ''
             taglive = ''
             sTitle2 = aEntry[1].replace('<br>', ' ')
-            sUrl3 = URL_MAIN + aEntry[0]
+#            sUrl3 = URL_MAIN + aEntry[0]
+            sUrl3 = aEntry[0]
 
             if 'live.gif' in aEntry[2]:
                 taglive = ' [COLOR limegreen] Online[/COLOR]'
@@ -198,10 +199,10 @@ def showMovies2():  # affiche les matchs en direct depuis la section showMovie
             sTitle2 = ('%s - %s [COLOR yellow]%s[/COLOR]') % (sDate, sTitle2, sQual)
             sDisplayTitle = sTitle2 + taglive
 
-            oOutputParameterHandler.addParameter('siteUrl3', sUrl3)
+            oOutputParameterHandler.addParameter('siteUrl4', sUrl3)
             oOutputParameterHandler.addParameter('sMovieTitle2', sTitle2)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
-            oGui.addDir(SITE_IDENTIFIER, 'showMovies3', sDisplayTitle, 'sport.png', oOutputParameterHandler)
+            oGui.addDir(SITE_IDENTIFIER, 'showHosters', sDisplayTitle, 'sport.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 
@@ -261,7 +262,8 @@ def showHosters():  # affiche les videos disponible du live
 
     oParser = cParser()
 #    sPattern = '<iframe.+?(?:allowFullScreen=|width).+?src="([^"]+)".+?</iframe>'
-    sPattern = '<iframe +(?:allowFullScreen|width).+?src="([^"]+)".+?<\/iframe>'
+#    sPattern = '<iframe +(?:allowFullScreen|width).+?src="([^"]+)".+?<\/iframe>'
+    sPattern = '<iframe.+?(?:allowFullScreen=|width).+?src=\'([^\']+)\''
     
     aResult = oParser.parse(sHtmlContent, sPattern)
 
@@ -1265,6 +1267,20 @@ def showHosters():  # affiche les videos disponible du live
                 sHosterUrl = aResult[0]
 
         # TODO A TESTER
+        if 'vidalmane' in url:
+#            web_pdb.set_trace()
+            oRequestHandler = cRequestHandler(url)
+            sHtmlContent2 = oRequestHandler.request()
+            sPattern1 = '<script src="(https.+?)"'
+            aResult = re.findall(sPattern1, sHtmlContent2)
+            if aResult:
+                sHosterUrl2 = aResult[0]
+                oRequestHandler = cRequestHandler(sHosterUrl2)
+                sHtmlContent3 = oRequestHandler.request()
+                sPattern3 = 'src="([^"]+)"></iframe>'
+                aResult1 = re.findall(sPattern3, sHtmlContent3)
+                if aResult1:
+                    sHosterUrl = getHosterIframe(aResult1[0], url)
         if 'wiz1' in url:
             oRequestHandler = cRequestHandler(url)
             sHtmlContent2 = oRequestHandler.request()
@@ -1433,10 +1449,10 @@ def getHosterIframe(url, referer):
                     sHosterUrl = oRequestHandler.getRealUrl()
                     return sHosterUrl + '|referer=' + referer
 
-    sPattern = 'file: *["\'](https.+?\.m3u8)["\']'
+    sPattern = '(file|source): *["\'](https.+?\.m3u8)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
-        oRequestHandler = cRequestHandler(aResult[0])
+        oRequestHandler = cRequestHandler(aResult[1])
         oRequestHandler.request()
         sHosterUrl = oRequestHandler.getRealUrl()
         return sHosterUrl + '|referer=' + referer
