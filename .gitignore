@@ -11,3 +11,5 @@ plugin.video.vstream/resources/art/Thumbs.db
 /.pydevproject
 /.vs
 *pycache*
+*.zip
+
