@@ -21,8 +21,8 @@ try:
 except:
     import simplejson as json
 
-SITE_IDENTIFIER = 'livetv'
-SITE_NAME = 'Live TV'
+SITE_IDENTIFIER = 'livetv_b'
+SITE_NAME = 'Live TV BIS'
 SITE_DESC = 'Evénements sportifs en direct'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
