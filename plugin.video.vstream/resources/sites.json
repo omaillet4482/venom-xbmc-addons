@@ -83,7 +83,8 @@
         "elitegol": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://elitegol.lat/"
+            "url": "https://footdirect.ru/",
+            "url_link": "ply"
         },
         "extreme_down": {
             "label": "ExtremeDown",
@@ -312,8 +313,8 @@
         "wiflix": {
             "label": "WiFlix",
             "active": "True",
-            "cloudflare": "True",
-            "url": "https://wiflix-catalogue.lol/"
+            "cloudflare": "False",
+            "url": "https://wiflix-hd.net/"
         },
         "wilifilm": {
             "label": "Wilifilm",
