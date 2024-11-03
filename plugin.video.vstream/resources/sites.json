@@ -193,6 +193,11 @@
             "active": "True",
             "url": "https://livetv818.me/"
         },
+        "livetv_b": {
+            "label": "Live TV BIS",
+            "active": "True",
+            "url": "https://liveru.sx/"
+        },
         "monstream": {
             "label": "Mon Stream",
             "active": "True",
