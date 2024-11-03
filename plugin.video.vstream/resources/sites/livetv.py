@@ -146,7 +146,7 @@ def showMovies2():  # affiche les matchs en direct depuis la section showMovie
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
      
-    dicoStream = {}
+    dicoStream = dict()
     if not aResult[0]:
         oGui.addText(SITE_IDENTIFIER)
     else:
@@ -201,7 +201,7 @@ def showMovies2():  # affiche les matchs en direct depuis la section showMovie
             sTitle2 = ('%s - %s [COLOR yellow]%s[/COLOR]') % (sDate, sTitle2, sQual)
             sDisplayTitle = sTitle2 + taglive
             
-            if sDisplayTitle in dicoStream:
+            if dicoStream.update:
                 dicoStream[sDisplayTitle].append(sTitle2)
             else:
                 dicoStream[sDisplayTitle] = [sTitle2]
