@@ -199,26 +199,31 @@ def showMovies2():  # affiche les matchs en direct depuis la section showMovie
                     pass
 
             sTitle2 = ('%s - %s [COLOR yellow]%s[/COLOR]') % (sDate, sTitle2, sQual)
-            sDisplayTitle = sTitle2 + taglive
+            sDisplayTitle = sTitle2          
+            dicoStream.setdefault(sTitle2, []).append(sUrl3)
             
-            if dicoStream.update:
-                dicoStream[sDisplayTitle].append(sTitle2)
-            else:
-                dicoStream[sDisplayTitle] = [sTitle2]
-            web_pdb.set_trace()
-
-            oOutputParameterHandler.addParameter('siteUrl4', sUrl3)
-            oOutputParameterHandler.addParameter('sMovieTitle2', sTitle2)
-            oOutputParameterHandler.addParameter('sThumb', sThumb)
-            oGui.addDir(SITE_IDENTIFIER, 'showHosters', sDisplayTitle, 'sport.png', oOutputParameterHandler)
-
+#    web_pdb.set_trace()
+    for keyLib, listUrl in dicoStream.items():
+       oOutputParameterHandler.addParameter('siteUrl4', '|'.join(listUrl))
+       oOutputParameterHandler.addParameter('sMovieTitle2', keyLib)
+       oOutputParameterHandler.addParameter('sThumb', 'sport.png')
+       oGui.addDir(SITE_IDENTIFIER, 'showMovies3', keyLib, 'sport.png', oOutputParameterHandler)
     oGui.setEndOfDirectory()
 
 
 def showMovies3():  # affiche les videos disponible du live
     oGui = cGui()
-
-
+#    web_pdb.set_trace()
+    oInputParameterHandler = cInputParameterHandler()
+    listURL = oInputParameterHandler.getValue('siteUrl4')
+    sMovieTitle2 = oInputParameterHandler.getValue('sMovieTitle2')  
+    
+    oOutputParameterHandler = cOutputParameterHandler()
+    for iUrl in listURL.split('|'):
+       oOutputParameterHandler.addParameter('siteUrl4', iUrl)
+       oOutputParameterHandler.addParameter('sMovieTitle2', sMovieTitle2)
+       oOutputParameterHandler.addParameter('sThumb', 'sport.png')
+       oGui.addDir(SITE_IDENTIFIER, 'showHosters', sMovieTitle2, 'sport.png', oOutputParameterHandler)
     oGui.setEndOfDirectory()
 
 def showMoviesList():  # affiche les videos disponible du live
@@ -1281,7 +1286,7 @@ def showHosters():  # affiche les videos disponible du live
                 sHosterUrl = aResult[0]
 
         # TODO A TESTER
-        if 'vidalmane' in url:
+        if 'vidalmane' in url or 'notamiltv' in url:
 #            web_pdb.set_trace()
             oRequestHandler = cRequestHandler(url)
             sHtmlContent2 = oRequestHandler.request()
