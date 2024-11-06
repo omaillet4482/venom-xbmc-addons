@@ -4,7 +4,7 @@
 import base64
 import re
 import xbmc
-import web_pdb
+#import web_pdb
 
 from resources.lib.comaddon import isMatrix, siteManager
 from resources.lib.gui.gui import cGui
@@ -205,7 +205,7 @@ def showMovies2():  # affiche les matchs en direct depuis la section showMovie
                 dicoStream[sDisplayTitle].append(sTitle2)
             else:
                 dicoStream[sDisplayTitle] = [sTitle2]
-            web_pdb.set_trace()
+            #web_pdb.set_trace()
 
             oOutputParameterHandler.addParameter('siteUrl4', sUrl3)
             oOutputParameterHandler.addParameter('sMovieTitle2', sTitle2)
