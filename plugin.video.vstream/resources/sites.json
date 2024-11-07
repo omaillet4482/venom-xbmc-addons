@@ -83,7 +83,13 @@
         "elitegol": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://footdirect.ru/",
+            "url": "https://2024tv.ru/",
+            "url_link": "ply"
+        },
+        "elitegol_b": {
+            "label": "Elitegol_b",
+            "active": "True",
+            "url": "https://2024tv.ru/",
             "url_link": "ply"
         },
         "extreme_down": {
