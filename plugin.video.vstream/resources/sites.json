@@ -95,6 +95,12 @@
             "url": "https://lefoot.ru/",
             "site_info": "https://elitegol.lat/",
             "url_link": "plyz/3"
+            },
+        "elitegol_b": {
+            "label": "Elitegol_b",
+            "active": "True",
+            "url": "https://2024tv.ru/",
+            "url_link": "ply"
         },
         "extreme_down": {
             "label": "ExtremeDown",
