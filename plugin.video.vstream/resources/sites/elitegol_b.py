@@ -166,7 +166,7 @@ def showMovies():
             sThumb = ''
             sType = aEntry['type']
 
-            sDisplayTitle = '%s %s - %s (%s)' %(sType, sDate, sTitle, sLang)
+            sDisplayTitle = '[COLOR yellow]%s[/COLOR] %s - %s (%s)' %(sType, sDate, sTitle, sLang)
             sDesc = sDisplayTitle
 
             oOutputParameterHandler.addParameter('siteUrl', json.dumps(sUrl2))
