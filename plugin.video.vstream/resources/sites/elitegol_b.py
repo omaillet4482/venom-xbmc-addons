@@ -33,6 +33,9 @@ SPORT_TV = ('lecteur/', 'showTV')
 
 UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0'
 
+#option
+OPTION_ID = '4'
+
 # chaines dans l'ordre d'affichage
 channels = {
     1: ['bein Sports 1', 'https://images.beinsports.com/n43EXNeoR62GvZlWW2SXKuQi0GA=/788708-HD1.png'],
@@ -113,7 +116,7 @@ def showTV():
         sThumb = channel[1]
 
         sDisplayTitle = channel[0]
-        sHostUrl = URL_LINK + '/2/%d' % iChannel
+        sHostUrl = URL_LINK + '/%s/%s' % (OPTION_ID,iChannel)
         oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
         oOutputParameterHandler.addParameter('sThumb', sThumb)
@@ -191,7 +194,7 @@ def showStreams():
        lang = chaine['lang']
        sDisplayTitle = '%s %s' % (sTitle,lang)
        iChannel = chaine['ch']
-       sHostUrl = URL_LINK + '/2/%s' % iChannel
+       sHostUrl = URL_LINK + '/%s/%s' % (OPTION_ID,iChannel)
        oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
        oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
        oOutputParameterHandler.addParameter('sThumb', sThumb)
@@ -241,7 +244,7 @@ def getHosterIframe(url, referer):
     sPattern = '(\s*eval\s*\(\s*function(?:.|\s)+?{}\)\))'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
-        sstr = aResult[0]
+        sstr = aResult[1]
         if not sstr.endswith(';'):
             sstr = sstr + ';'
         sHtmlContent = cPacker().unpack(sstr)
