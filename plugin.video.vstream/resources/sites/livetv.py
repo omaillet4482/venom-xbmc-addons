@@ -27,21 +27,21 @@ SITE_DESC = 'Evénements sportifs en direct'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 # URL_MAIN = dans sites.json
 
-SPORT_GENRES = ('/frx/allupcoming/', 'showMovies')  # Liste de diffusion des sports
-SPORT_LIVE = ('/frx/', 'showLive')  # streaming Actif
+SPORT_GENRES = ('frx/allupcoming/', 'showGenres')  # Liste de diffusion des sports
+SPORT_LIVE = ('frx/', 'showLive')  # streaming Actif
 SPORT_SPORTS = (True, 'load')
 
-HEURE_HIVER = False
+HEURE_HIVER = True
 
 def load():
     oGui = cGui()
     oOutputParameterHandler = cOutputParameterHandler()
 
     oOutputParameterHandler.addParameter('siteUrl', SPORT_GENRES[0])
-    oGui.addDir(SITE_IDENTIFIER, SPORT_GENRES[1], 'Les sports (Genres)', 'genres.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, SPORT_GENRES[1], 'Par genres', 'genre_sport.png', oOutputParameterHandler)
 
     oOutputParameterHandler.addParameter('siteUrl', SPORT_LIVE[0])
-    oGui.addDir(SITE_IDENTIFIER, SPORT_LIVE[1], 'Les sports (En direct)', 'news.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, SPORT_LIVE[1], 'En cours', 'replay.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 
@@ -93,7 +93,7 @@ def showLive():
     oGui.setEndOfDirectory()
 
 
-def showMovies():  # affiche les catégories qui ont des lives'
+def showGenres():  # affiche les catégories qui ont des lives'
     oGui = cGui()
 
     oInputParameterHandler = cInputParameterHandler()
@@ -109,7 +109,7 @@ def showMovies():  # affiche les catégories qui ont des lives'
         oGui.addText(SITE_IDENTIFIER)
     else:
         oOutputParameterHandler = cOutputParameterHandler()
-        for aEntry in aResult[1]:
+        for aEntry in sorted(aResult[1], key=lambda genre: genre[1]):
             sUrl2 = URL_MAIN + aEntry[0]
             sTitle = aEntry[1]
 
@@ -127,12 +127,12 @@ def showMovies():  # affiche les catégories qui ont des lives'
 
             oOutputParameterHandler.addParameter('siteUrl2', sUrl2)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-            oGui.addDir(SITE_IDENTIFIER, 'showMovies2', sTitle, 'genres.png', oOutputParameterHandler)
+            oGui.addDir(SITE_IDENTIFIER, 'showMovies', sTitle, 'sport.png', oOutputParameterHandler)
 
         oGui.setEndOfDirectory()
 
 
-def showMovies2():  # affiche les matchs en direct depuis la section showMovie
+def showMovies():  # affiche les matchs en direct depuis la section showMovie
 
     oGui = cGui()
     oInputParameterHandler = cInputParameterHandler()
@@ -272,6 +272,9 @@ def showHosters():  # affiche les videos disponible du live
         url = aResult[1][0]
         if not (url.startswith("http")):
             url = "http:" + url
+
+        if 'youtube' in url:
+            sHosterUrl = url
 
         if 'popofthestream' in url:
             oRequestHandler = cRequestHandler(url)
@@ -1303,7 +1306,7 @@ def showHosters():  # affiche les videos disponible du live
             if sHosterUrl.startswith('//'):
                 sHosterUrl = 'http:' + sHosterUrl
 
-            oHoster = cHosterGui().checkHoster(".m3u8")
+            oHoster = cHosterGui().checkHoster(sHosterUrl)#".m3u8")
             if oHoster:
                 oHoster.setDisplayName(sMovieTitle2)  # nom affiche
                 oHoster.setFileName(sMovieTitle2)  # idem

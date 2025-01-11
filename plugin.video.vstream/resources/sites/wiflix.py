@@ -30,7 +30,7 @@ SERIE_SERIES = (URL_MAIN + 'serie-en-streaming/', 'showSeries')
 SERIE_NEWS = (URL_MAIN + 'serie-en-streaming/', 'showSeries')
 # SERIE_LIST = (URL_MAIN + 'serie-streaming/', 'showSeriesList')
 
-URL_SEARCH = (URL_MAIN, 'showSearch')
+URL_SEARCH = (URL_MAIN + 'index.php?do=search', 'showSearch')
 URL_SEARCH_MOVIES = ('', 'showMovies')
 URL_SEARCH_SERIES = ('', 'showSeries')
 FUNCTION_SEARCH = 'showSearch'
@@ -41,10 +41,10 @@ def load():
 
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', 'http://film')
-    oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Recherche Films', 'search.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Recherche Films', 'search-films.png', oOutputParameterHandler)
 
     oOutputParameterHandler.addParameter('siteUrl', 'http://serie')
-    oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Recherche Séries', 'search.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, 'showSearch', 'Recherche Séries', 'search-series.png', oOutputParameterHandler)
 
     oOutputParameterHandler.addParameter('siteUrl', MOVIE_NEWS[0])
     oGui.addDir(SITE_IDENTIFIER, MOVIE_NEWS[1], 'Films (Derniers ajouts)', 'news.png', oOutputParameterHandler)
@@ -110,7 +110,7 @@ def showGenres():
         oOutputParameterHandler = cOutputParameterHandler()
         for sTitle, sUrl in TriAlpha:
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
-            oGui.addDir(SITE_IDENTIFIER, 'showMovies', sTitle, 'genres.png', oOutputParameterHandler)
+            oGui.addGenre(SITE_IDENTIFIER, 'showMovies', sTitle, oOutputParameterHandler)
         oGui.setEndOfDirectory()
 
 
@@ -246,13 +246,13 @@ def showSeries(sSearch=''):
         oRequestHandler = cRequestHandler(sUrl)
         sHtmlContent = oRequestHandler.request()
 
-    sPattern = 'mov clearfix.+?src="([^"]+)" *alt="([^"]+).+?data-link="([^"]+).+?block-sai">([^<]+).+?ml-desc">(.+?)</div>'
-
+    sPattern = 'mov clearfix.+?src="([^"]+)" *alt="([^"]+).+?data-link="([^"]+)'
     aResult = oParser.parse(sHtmlContent, sPattern)
+    
     if aResult[0]:
         oOutputParameterHandler = cOutputParameterHandler()
 
-        for aEntry in aResult[1]:
+        for aEntry in aResult[1][::-1]:
             sThumb = aEntry[0]
             if sThumb.startswith('/'):
                 sThumb = URL_MAIN[:-1] + aEntry[0]
@@ -265,12 +265,11 @@ def showSeries(sSearch=''):
             
             sDisplayTitle = sTitle
             sUrl = aEntry[2]
-            sDesc = aEntry[4]
 
             oOutputParameterHandler.addParameter('siteUrl', sUrl)
             oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
-            oGui.addSeason(SITE_IDENTIFIER, 'showEpisodes', sDisplayTitle, '', sThumb, sDesc, oOutputParameterHandler)
+            oGui.addSeason(SITE_IDENTIFIER, 'showEpisodes', sDisplayTitle, '', sThumb, '', oOutputParameterHandler)
 
         sNextPage, sPaging = __checkForNextPage(sHtmlContent)
         if sNextPage:
@@ -290,7 +289,7 @@ def showEpisodes():
     sThumb = oInputParameterHandler.getValue('sThumb')
     oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
-    sPattern = '"clicbtn" rel="(ep\d(vf|vs))" *>Episode (\d)<'
+    sPattern = '"clicbtn" rel="(ep\d+(vf|vs))" *>Episode (\d+)<'
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
 

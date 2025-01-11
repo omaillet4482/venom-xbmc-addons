@@ -38,6 +38,7 @@ class cUtil:
     # percent : pourcentage de concordance, 75% = il faut au moins 3 mots sur 4
     # retourne True si pourcentage atteint
     def CheckOccurence(self, str1, str2, percent=75):
+        str1 = self.CleanName(str1)
         str2 = self.CleanName(str2)
         nbOccurence = nbWord = 0
         list2 = str2.split(' ')   # Comparaison mot à mot
@@ -92,6 +93,23 @@ class cUtil:
                     pass
         return text
 
+    def ASCIIDecode(self, string):
+        i = 0
+        l = len(string)
+        ret = ''
+        while i < l:
+            c = string[i]
+            if string[i:(i + 2)] == '\\x':
+                c = chr(int(string[(i + 2):(i + 4)], 16))
+                i += 3
+            if string[i:(i+2)] == '\\u':
+                c = chr(int(string[(i + 2):(i + 6)], 16))
+                i += 5
+            ret = ret + c
+            i += 1
+    
+        return ret
+    
     def unescape(self, text):
         # determine si conversion en unicode nécessaire        
         isStr = isinstance(text, str)
@@ -123,14 +141,19 @@ class cUtil:
 
     def titleWatched(self, title):
 
+        title = title.replace('²', ' 2').replace('³', ' 3').replace('⁴', ' 4')
+
         title = self.formatUTF8(title)
 
         # cherche la saison et episode puis les balises [color]titre[/color]
         # title, saison = self.getSaisonTitre(title)
         # title, episode = self.getEpisodeTitre(title)
         # supprimer les balises
-        title = re.sub(r'\[.*\]|\(.*\)', r'', str(title))
-        title = title.replace('VF', '').replace('VOSTFR', '').replace('FR', '')
+
+        title = title.replace('[', '').replace(']', '')
+#        title = re.sub(r'\[.*\]|\(.*\)', r'', str(title))
+        title = title.replace('VF', '').replace('VOSTFR', '')
+        title = re.sub('(\W|_|^)FR(\W|_|$)', '', title) # FR s'il n'est pas entouré de caractere
         # title = re.sub(r'[0-9]+?', r'', str(title))
         title = title.replace('-', ' ')  # on garde un espace pour que Orient-express ne devienne pas Orientexpress pour la recherche tmdb
         title = title.replace('Saison', '').replace('saison', '').replace('Season', '').replace('Episode', '').replace('episode', '')

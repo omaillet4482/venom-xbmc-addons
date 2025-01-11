@@ -16,7 +16,7 @@ class cHoster(iHoster):
 
     def setUrl(self, url):
         url = url.replace('embed-dlox.me/', 'embed-')
-        self._url = str(url)
+        super(cHoster, self).setUrl(url)
 
     def _getMediaLinkForGuest(self):
         oParser = cParser()
@@ -30,11 +30,11 @@ class cHoster(iHoster):
         sPattern = '([^"]+\.mp4)'
         oParser = cParser()
         aResult = oParser.parse(sHtmlContent, sPattern)
+        api_call = ''
         if aResult[0] is True:
             # initialisation des tableaux
             url = []
             qua = ["HD", "SD"]  # sd en 2eme pos generalement quand sd
-            api_call = ''
 
             # Remplissage des tableaux
             for i in aResult[1]:

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 import re
+import datetime
 
 from resources.lib.packer import cPacker
 from resources.lib.comaddon import isMatrix, siteManager
@@ -9,7 +10,6 @@ from resources.lib.gui.hoster import cHosterGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
 from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler
-from resources.lib.parser import cParser
 
 
 SITE_IDENTIFIER = 'elitegol'
@@ -17,9 +17,12 @@ SITE_NAME = 'Elitegol'
 SITE_DESC = 'Chaines TV en directs'
 
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
+URL_LINK = siteManager().getDefaultProperty(SITE_IDENTIFIER, 'url_link')
+
+
 SPORT_SPORTS = (True, 'load')
-SPORT_GENRES = ('/', 'showGenres')  # FOOT
-SPORT_LIVE = ('/', 'showMovies')
+SPORT_GENRES = ('data.php', 'showGenres')  # FOOT
+SPORT_LIVE = ('data.php', 'showMovies')
 SPORT_TV = ('lecteur/', 'showTV')
 
 UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0'
@@ -29,23 +32,23 @@ channels = {
     1: ['bein Sports 1', 'https://images.beinsports.com/n43EXNeoR62GvZlWW2SXKuQi0GA=/788708-HD1.png'],
     20: ['DAZN1', 'https://miguia.tv/channels/big_329@2x.png'],
     21: ['prime video ligue 1', 'https://i.imgur.com/PvpkxgG.png'],
-    #20: ['prime video ligue 2', 'https://i.imgur.com/PvpkxgG.png'],
+    # 20: ['prime video ligue 2', 'https://i.imgur.com/PvpkxgG.png'],
     5: ['Canal+', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_301.PNG'],
     17: ['Canal+ Foot', 'https://thumb.canalplus.pro/bran/unsafe/870x486/image/62dab6a90b84c/uploads/media/C+FOOT_213x160.png'],
     6: ['Canal+ sport', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_177.PNG'],
     28: ['Canal+ sport 360', 'https://matchpint-cdn.matchpint.cloud/shared/imagenes/channels/284_logo_1599851988.png'],
-    #17: ['Canal+ décalé', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_257.PNG'],
+    # 17: ['Canal+ décalé', 'https://thumb.canalplus.pro/http/unsafe/epg.canal-plus.com/mycanal/img/CHN43FN/PNG/213X160/CHN43FB_257.PNG'],
     7: ['eurosport 1', 'https://2.bp.blogspot.com/-qEkUoydNN-E/WvMoKma36fI/AAAAAAAAG_0/ov-d571uhZ443Nai7gdU9sSIV2IBOkquQCLcBGAs/s1600/europsort-1-HD.jpg'],
     8: ['eurosport 2', 'https://4.bp.blogspot.com/-1bHZ8b5ZnW0/VzDh6KfzayI/AAAAAAAABsI/lKDWcPmyBSk7etoAj2DVr7nvQ5SsMPwzgCLcB/s1600/fhuxmcp92wg1w4y9pd2v4zjz3xs1vmjm.jpg'],
     4: ['RMC Sport 1', 'https://i0.wp.com/www.planetecsat.com/wp-content/uploads/2018/07/RMC_SPORT1_PNG_500x500px.png?w=500&ssl=1'],
     9: ['RMC Sport 2', 'https://i0.wp.com/www.planetecsat.com/wp-content/uploads/2018/07/RMC_SPORT2_PNG_500x500px.png?fit=500%2C500&ssl=1'],
     18: ['L\'equipe TV', 'https://www.cse.fr/wp-content/uploads/2016/02/LEquipe_logo-300x200-300x150.png'],
     19: ['Automoto', 'https://moto-station.com/wp-content/uploads/2021/05/05/Automoto-La-Chaine-logo_0.png.jpg'],
-    #24: ['RMC Sport 3', 'https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/rmcsport32.png'],
-    #25: ['RMC Sport 3', 'https://i.imgur.com/PvpkxgG.png'],
-    #26: ['prime video ligue 1/2 (LDC8)', 'https://i.imgur.com/PvpkxgG.png'],
-    #27: ['prime video ligue 1/2 (LDC9)', 'https://i.imgur.com/PvpkxgG.png'],
-    #28: ['prime video ligue 1/2 (LDC10)', 'https://i.imgur.com/PvpkxgG.png'],
+    # 24: ['RMC Sport 3', 'https://www.monpetitforfait.com/comparateur-box-internet/wp-content/uploads/2020/06/rmcsport32.png'],
+    # 25: ['RMC Sport 3', 'https://i.imgur.com/PvpkxgG.png'],
+    # 26: ['prime video ligue 1/2 (LDC8)', 'https://i.imgur.com/PvpkxgG.png'],
+    # 27: ['prime video ligue 1/2 (LDC9)', 'https://i.imgur.com/PvpkxgG.png'],
+    # 28: ['prime video ligue 1/2 (LDC10)', 'https://i.imgur.com/PvpkxgG.png'],
     2: ['bein Sports 2', 'https://images.beinsports.com/dZ2ESOsGlqynphSgs7MAGLwFAcg=/788711-HD2.png'],
     3: ['bein Sports 3', 'https://images.beinsports.com/G4M9yQ3f4vbFINuKGIoeJQ6kF_I=/788712-HD3.png'],
     10: ['bein Sports MAX 4', 'https://images.beinsports.com/owLVmBRH9cHk6K9JSocpTw0Oc4E=/788713-4MAX.png'],
@@ -66,27 +69,47 @@ channels = {
     23: ['France 3', 'https://i.imgur.com/PvpkxgG.png'],
     30: ['France 2', 'https://www.ffp.asso.fr/wp-content/uploads/2018/10/France-2.png'],
     38: ['France 3', 'https://static.wikia.nocookie.net/hdl-logopedia/images/0/0a/Logo-france-3.png/revision/latest/scale-to-width-down/220?cb=20180220171302&path-prefix=fr']
-#    40: ['FFFtv', 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Tmc_2016.png']
+    # 40: ['FFFtv', 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Tmc_2016.png']
     }
 
 def load():
     oGui = cGui()
 
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', SPORT_LIVE[0])
-    oGui.addDir(SITE_IDENTIFIER, SPORT_LIVE[1], 'Sports (En direct)', 'replay.png', oOutputParameterHandler)
-
     oOutputParameterHandler.addParameter('siteUrl', SPORT_TV[0])
-    oGui.addDir(SITE_IDENTIFIER, SPORT_TV[1], 'Chaines TV Sports', 'sport.png', oOutputParameterHandler)
+    oGui.addDir(SITE_IDENTIFIER, SPORT_TV[1], 'Chaines', 'tv.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', SPORT_GENRES[0])
+    oGui.addDir(SITE_IDENTIFIER, SPORT_GENRES[1], 'Par genres', 'genre_sport.png', oOutputParameterHandler)
+
+    oOutputParameterHandler.addParameter('siteUrl', SPORT_LIVE[0])
+    oGui.addDir(SITE_IDENTIFIER, SPORT_LIVE[1], 'En cours', 'replay.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 
 def showGenres():
     oGui = cGui()
+    oInputParameterHandler = cInputParameterHandler()
+    sUrl = oInputParameterHandler.getValue('siteUrl')
+
+    oRequestHandler = cRequestHandler(URL_MAIN + sUrl)
+    links = oRequestHandler.request(jsonDecode=True)
+
+    types = set()
     oOutputParameterHandler = cOutputParameterHandler()
-    oOutputParameterHandler.addParameter('siteUrl', SPORT_LIVE[0])
-    oGui.addDir(SITE_IDENTIFIER, SPORT_LIVE[1], 'Football', 'genres.png', oOutputParameterHandler)
+    for link in links:
+        types.add(link['type'].capitalize())
+
+    for sTitle in sorted(types):
+        sDiplayTitle = sTitle.replace('Footus', 'Foot US')
+        oOutputParameterHandler.addParameter('siteUrl', sUrl)
+        oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
+        oOutputParameterHandler.addParameter('sDesc', sTitle)
+        
+        oGui.addDir(SITE_IDENTIFIER, 'showMovies', sDiplayTitle, "sport.png", oOutputParameterHandler)
+
     oGui.setEndOfDirectory()
+
 
 def showTV():
     oGui = cGui()
@@ -94,9 +117,9 @@ def showTV():
     chaines = [20, 1, 5, 17, 6, 28, 7, 8, 4, 9, 18, 19, 2, 3, 10, 11, 12, 13, 14, 15, 16]
     
     # if 'sport' in sUrl:
-    #     chaines = [1, 4, 21, 20, 5, 6, 7, 8, 18, 19, 9, 2, 3, 10, 11, 12, 13, 14, 15, 16, 22, 23, 24, 25, 26, 27, 28, 37, 31, 32, 33, 34, 35, 36]
+    # chaines = [1, 4, 21, 20, 5, 6, 7, 8, 18, 19, 9, 2, 3, 10, 11, 12, 13, 14, 15, 16, 22, 23, 24, 25, 26, 27, 28, 37, 31, 32, 33, 34, 35, 36]
     # else: # Chaines ciné
-    #     chaines = [21, 22, 23, 29, 30, 38, 5, 17, 39]
+    # chaines = [21, 22, 23, 29, 30, 38, 5, 17, 39]
 
     oOutputParameterHandler = cOutputParameterHandler()
     for iChannel in chaines:
@@ -104,7 +127,7 @@ def showTV():
         sThumb = channel[1]
 
         sDisplayTitle = channel[0]
-        sHostUrl = 'lec/2/%d' % iChannel
+        sHostUrl = URL_LINK + '/%d' % iChannel
         oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
         oOutputParameterHandler.addParameter('sThumb', sThumb)
@@ -123,7 +146,7 @@ def showTVLink():
 
     oOutputParameterHandler = cOutputParameterHandler()
     for numChannel in range(1, 6):
-        sHostUrl = "lec/%d/%s" % (numChannel, sUrl)
+        sHostUrl = URL_LINK + "/%d/%s" % (numChannel, sUrl)
         sDisplayTitle = '%s - Lien %d' % (sTitle, numChannel)
         oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
@@ -135,38 +158,49 @@ def showTVLink():
 
 def showMovies():
     oGui = cGui()
-    oParser = cParser()
-
     oInputParameterHandler = cInputParameterHandler()
     sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl')
+    sSearchType = oInputParameterHandler.getValue('sMovieTitle')
 
     oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request()
+    links = oRequestHandler.request(jsonDecode=True)
+
+    oOutputParameterHandler = cOutputParameterHandler()
+    for link in links:
+        sType = link['type']
+        if sSearchType and sType.capitalize() != sSearchType:  # filtrage du genre recherché
+            continue
+        
+        time = link['time']
+        home = link['home']
+        away = link['away']
+        league = link['league']
+        
+        time = datetime.datetime.fromtimestamp(int(time)/1000)
+#        time = datetime.datetime.strftime(time, '%d/%m/%Y %H:%M:%S')
+        time = datetime.datetime.strftime(time, '%H:%M:%S')
+        
+        if away:
+            sTitle = '%s - %s / %s (%s)' % (time, home, away, league)
+        else:
+            sTitle = '%s - %s (%s)' % (time, home, league)
+        
+        for streams in link['streams']:
+            channel = streams['ch']
+            sHostUrl = '%s/%s' % (URL_LINK, channel)
+
+            lang = streams['lang']
+            sDisplayTitle = '%s [%s]' % (sTitle, lang.upper())
+            
+            oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
+            oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
+#            oOutputParameterHandler.addParameter('sThumb', sThumb)
+            oOutputParameterHandler.addParameter('sDesc', sDisplayTitle)
     
-    # titre / heure / id / lang
-    sPattern = 'href="#">([^<]+).+?>(\d+:\d+).+?STREAM (\d+) ([^<]+)'
-    aResult = oParser.parse(sHtmlContent, sPattern)
-
-    if aResult[0]:
-        oOutputParameterHandler = cOutputParameterHandler()
-        for aEntry in aResult[1]:
-            sTitle = aEntry[0]
-            sTime = aEntry[1]
-            sUrl2 = 'lec/2/%s' % aEntry[2]
-            sLang = aEntry[3]
-            sThumb = ''
-
-            sDisplayTitle = '%s - %s (%s)' %(sTime, sTitle, sLang)
-            sDesc = sDisplayTitle
-
-            oOutputParameterHandler.addParameter('siteUrl', sUrl2)
-            oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
-            oOutputParameterHandler.addParameter('sThumb', sThumb)
-            oOutputParameterHandler.addParameter('sDesc', sDesc)
-
             oGui.addDir(SITE_IDENTIFIER, 'showLink', sDisplayTitle, "sport.png", oOutputParameterHandler)
-
+        
     oGui.setEndOfDirectory()
+
 
 def showLink():
     oGui = cGui()
@@ -207,13 +241,21 @@ def getHosterIframe(url, referer):
 
     referer = oRequestHandler.getRealUrl()
     
+    return getUrl(sHtmlContent, referer)
+
+
+def getUrl(sHtmlContent, referer):
+
     sPattern = '(\s*eval\s*\(\s*function(?:.|\s)+?{}\)\))'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
-        sstr = aResult[0]
-        if not sstr.endswith(';'):
-            sstr = sstr + ';'
-        sHtmlContent = cPacker().unpack(sstr)
+        for sstr in aResult:
+            if not sstr.endswith(';'):
+                sstr = sstr + ';'
+            sHtmlContent = cPacker().unpack(sstr)
+            url = getUrl(sHtmlContent, referer)
+            if url:
+                return url
 
     sPattern = '.atob\("(.+?)"'
     aResult = re.findall(sPattern, sHtmlContent)
@@ -257,9 +299,9 @@ def getHosterIframe(url, referer):
     sPattern = ';var.+?src=["\']([^"\']+)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
     if aResult:
-        url = aResult[0]
-        if '.m3u8' in url:
-            return url
+        for url in aResult:
+            if '.m3u8' in url:
+                return url + '|Referer=' + referer
 
     sPattern = '[^/]source.+?["\'](https.+?)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
