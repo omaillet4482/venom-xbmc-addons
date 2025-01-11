@@ -83,16 +83,16 @@
         "elitegol": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://gglive.ru/",
-			"site_info": "https://elitegol.lat/",
-			"url_link": "ply"
+            "url": "https://lefoot.ru/",
+	    "site_info": "https://elitegol.lat/",
+	    "url_link": "plyz"
         },
         "elitegol_b": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://gglive.ru/",
-			"site_info": "https://elitegol.lat/",
-			"url_link": "ply"
+            "url": "https://lefoot.ru/",
+	    "site_info": "https://elitegol.lat/",
+	    "url_link": "plyz"
         },
         "extreme_down": {
             "label": "ExtremeDown",
