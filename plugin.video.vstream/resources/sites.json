@@ -93,9 +93,9 @@
             "label": "Elitegol",
             "active": "True",
             "url": "https://lefoot.ru/",
-            "site_info": "https://elitegol.lat/",
-            "url_link": "plyz/3"
-            },
+	    "site_info": "https://elitegol.lat/",
+	    "url_link": "plyz"
+        },
         "elitegol_b": {
             "label": "Elitegol",
             "active": "True",
@@ -198,7 +198,7 @@
         "livetv": {
             "label": "Live TV",
             "active": "True",
-            "url": "https://livetv818.me/"
+            "url": "https://liveru.sx/"
         },
         "livetv_b": {
             "label": "Live TV BIS",
