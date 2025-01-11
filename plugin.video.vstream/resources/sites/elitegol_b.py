@@ -27,14 +27,14 @@ URL_LINK = siteManager().getProperty(SITE_IDENTIFIER, 'url_link')
 
 
 SPORT_SPORTS = (True, 'load')
-SPORT_GENRES = ('/', 'showGenres')  # FOOT
-SPORT_LIVE = ('/', 'showMovies')
-SPORT_TV = ('lecteur/', 'showTV')
+SPORT_GENRES = ('/', 'showMovies','data-ch.php')  # FOOT
+SPORT_LIVE = ('/', 'showMovies', 'data.php')
+SPORT_TV = ('/', 'showMovies','data-ch.php')
 
 UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0'
 
 #option
-OPTION_ID = '4'
+OPTION_ID = '3'
 
 # chaines dans l'ordre d'affichage
 channels = {
@@ -86,9 +86,11 @@ def load():
 
     oOutputParameterHandler = cOutputParameterHandler()
     oOutputParameterHandler.addParameter('siteUrl', SPORT_LIVE[0])
+    oOutputParameterHandler.addParameter('fetch', SPORT_LIVE[2])
     oGui.addDir(SITE_IDENTIFIER, SPORT_LIVE[1], 'Sports (En direct)', 'replay.png', oOutputParameterHandler)
 
     oOutputParameterHandler.addParameter('siteUrl', SPORT_TV[0])
+    oOutputParameterHandler.addParameter('fetch', SPORT_TV[2])
     oGui.addDir(SITE_IDENTIFIER, SPORT_TV[1], 'Chaines TV Sports', 'sport.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
@@ -150,9 +152,9 @@ def showMovies():
     oParser = cParser()
 
     oInputParameterHandler = cInputParameterHandler()
-    sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl')
+    sUrl = URL_MAIN + oInputParameterHandler.getValue('siteUrl') + oInputParameterHandler.getValue('fetch')
 
-    oRequestHandler = cRequestHandler(sUrl+ 'data.php')
+    oRequestHandler = cRequestHandler(sUrl)
     sHtmlContent = oRequestHandler.request()
     #web_pdb.set_trace()
 
@@ -293,7 +295,7 @@ def getHosterIframe(url, referer):
     if aResult:
         url = aResult[0]
         if '.m3u8' in url:
-            return url
+            return url + '|referer=' + referer
 
     sPattern = '[^/]source.+?["\'](https.+?)["\']'
     aResult = re.findall(sPattern, sHtmlContent)
