@@ -92,14 +92,14 @@
         "elitegol": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://lefoot.ru/",
+            "url": "https://footlive.ru/",
 	    "site_info": "https://elitegol.lat/",
 	    "url_link": "plyz"
         },
         "elitegol_b": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://lefoot.ru/",
+            "url": "https://footlive.ru/",
 	    "site_info": "https://elitegol.lat/",
 	    "url_link": "plyz"
         },
