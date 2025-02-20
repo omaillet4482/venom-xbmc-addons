@@ -13,9 +13,10 @@ class cUpdate:
         addons = addon()
 
         # Si pas d'ancienne date = premiere installation, on force une vieille date
-        setting_time = addons.getSetting('setting_time')
-        if not setting_time:
-            setting_time = '2000-09-23 10:59:50.877000'
+        #setting_time = addons.getSetting('setting_time')
+        #if not setting_time:
+        #    setting_time = '2000-09-23 10:59:50.877000'
+        setting_time = '2050-09-23 10:59:50.877000'
 
         # delai mise a jour
         time_now = datetime.datetime.now()

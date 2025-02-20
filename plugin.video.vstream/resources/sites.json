@@ -92,14 +92,14 @@
         "elitegol": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://footlive.ru/",
+            "url": "https://matele.ru/",
 	    "site_info": "https://elitegol.lat/",
-	    "url_link": "plyz"
+	    "url_link": "plyz/3"
         },
         "elitegol_b": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://footlive.ru/",
+            "url": "https://matele.ru/",
 	    "site_info": "https://elitegol.lat/",
 	    "url_link": "plyz"
         },
