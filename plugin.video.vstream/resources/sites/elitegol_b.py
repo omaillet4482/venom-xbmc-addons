@@ -28,7 +28,7 @@ URL_LINK = siteManager().getProperty(SITE_IDENTIFIER, 'url_link')
 
 SPORT_SPORTS = (True, 'load')
 SPORT_GENRES = ('/', 'showMovies','data-ch.php')  # FOOT
-SPORT_LIVE = ('/', 'showMovies', 'data.php')
+SPORT_LIVE = ('/', 'showMovies', 'json.php?ldc')
 SPORT_TV = ('/', 'showMovies','data-ch.php')
 
 UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0'
@@ -118,7 +118,7 @@ def showTV():
         sThumb = channel[1]
 
         sDisplayTitle = channel[0]
-        sHostUrl = URL_LINK + '/%s/%s' % (OPTION_ID,iChannel)
+        sHostUrl = URL_LINK + '/%s' % (iChannel)
         oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
         oOutputParameterHandler.addParameter('sThumb', sThumb)
@@ -196,7 +196,7 @@ def showStreams():
        lang = chaine['lang']
        sDisplayTitle = '%s %s' % (sTitle,lang)
        iChannel = chaine['ch']
-       sHostUrl = URL_LINK + '/%s/%s' % (OPTION_ID,iChannel)
+       sHostUrl = URL_LINK + '/%s' % (iChannel)
        oOutputParameterHandler.addParameter('siteUrl', sHostUrl)
        oOutputParameterHandler.addParameter('sMovieTitle', sDisplayTitle)
        oOutputParameterHandler.addParameter('sThumb', sThumb)
