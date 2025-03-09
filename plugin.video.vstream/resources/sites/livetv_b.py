@@ -1286,7 +1286,7 @@ def showHosters():  # affiche les videos disponible du live
                 sHosterUrl = aResult[0]
 
         # TODO A TESTER
-        if 'vidalmane' in url or 'notamiltv' in url:
+        if 'vidalmane' in url or 'notamiltv' in url or 'bolamucha' in url:
 #            web_pdb.set_trace()
             oRequestHandler = cRequestHandler(url)
             sHtmlContent2 = oRequestHandler.request()
