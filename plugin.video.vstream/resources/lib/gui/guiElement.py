@@ -194,18 +194,18 @@ class cGuiElement:
     def TraiteTitre(self, sTitle):
         bMatrix = isMatrix()
 
-        # convertion unicode ne fonctionne pas avec les accents
-        try:
-            # traitement du titre pour retirer le - quand c'est une Saison. Tiret, tiret moyen et cadratin
-            sTitle = sTitle.replace('Season', 'saison').replace('season', 'saison').replace('SEASON', 'saison')\
-                           .replace('Saison', 'saison').replace('SAISON', 'saison')
-            sTitle = sTitle.replace(' - saison', ' saison').replace(' – saison', ' saison')\
-                           .replace(' — saison', ' saison')
+        # conversion unicode ne fonctionne pas avec les accents
+        # try:
+        #     if not bMatrix:
+        #         sTitle = sTitle.decode('utf-8')
+        # except:
+        #     pass
 
-            if not bMatrix:
-                sTitle = sTitle.decode('utf-8')
-        except:
-            pass
+        # traitement du titre pour retirer le - quand c'est une Saison. Tiret, tiret moyen et cadratin
+        sTitle = sTitle.replace('Season', 'saison').replace('season', 'saison').replace('SEASON', 'saison')\
+                       .replace('Saison', 'saison').replace('SAISON', 'saison')
+        #sTitle = sTitle.replace(' - saison', ' saison').replace(' – saison', ' saison')#.replace(' — saison', ' saison')
+
 
         """ Début du nettoyage du titre """
         # vire doubles espaces et double points
@@ -220,6 +220,13 @@ class cGuiElement:
         # et au debut
         sTitle = re.sub('^[- –_\.]+', '', sTitle)
 
+        # Nom en clair sans les langues, qualités, et autres décorations
+        self.__sCleanTitle = re.sub('\[.*\]|\(.*\)', '', sTitle)
+        if not self.__sCleanTitle:
+            self.__sCleanTitle = re.sub('\[.+?\]|\(.+?\)', '', sTitle)
+            if not self.__sCleanTitle:
+                self.__sCleanTitle = sTitle.replace('[', '').replace(']', '').replace('(', '').replace(')', '')
+        
         """ Fin du nettoyage du titre """
 
         # recherche l'année, uniquement si entre caractere special a cause de 2001 odysse de l'espace ou k2000
@@ -278,12 +285,12 @@ class cGuiElement:
                 if not self.__Season:
                     self.__Season = '1'   # forcer pour les séries sans saison
 
-        # on repasse en utf-8
-        if not bMatrix:
-            try:
-                sTitle = sTitle.encode('utf-8')
-            except:
-                pass
+        # # on repasse en utf-8
+        # if not bMatrix:
+        #     try:
+        #         sTitle = sTitle.encode('utf-8')
+        #     except:
+        #         pass
 
         # on reformate SXXEXX Titre [tag] (Annee)
         sTitle2 = ''
@@ -293,10 +300,14 @@ class cGuiElement:
             sTitle2 = sTitle2 + 'E%02d' % int(self.__Episode)
 
         # Titre unique pour marquer VU (avec numéro de l'épisode pour les séries)
-        self.__sTitleWatched = cUtil().titleWatched(sTitle).replace(' ', '')
-        if sTitle2:
-            self.addItemValues('tvshowtitle', cUtil().getSerieTitre(sTitle))
-            self.__sTitleWatched += '_' + sTitle2
+        if sTitle2: # série
+            tvshowtitle = cUtil().getSerieTitre(sTitle)
+            titleWatched = cUtil().titleWatched(tvshowtitle) + '_' + sTitle2
+            self.addItemValues('tvshowtitle', tvshowtitle)  # nom de la série
+        else:
+            titleWatched = cUtil().titleWatched(self.__sCleanTitle)
+
+        self.__sTitleWatched = titleWatched.replace(' ', '')
         self.addItemValues('originaltitle', self.__sTitleWatched)
 
         if sTitle2:
@@ -309,18 +320,12 @@ class cGuiElement:
 
         return sTitle2
 
+
     # Permet de forcer le titre sans aucun traitement
     def setRawTitle(self, sTitle):
-        self.__sTitle = sTitle
+        self.__sCleanTitle = self.__sTitle = sTitle
         
     def setTitle(self, sTitle):
-        # Nom en clair sans les langues, qualités, et autres décorations
-        self.__sCleanTitle = re.sub('\[.*\]|\(.*\)', '', sTitle)
-        if not self.__sCleanTitle:
-            self.__sCleanTitle = re.sub('\[.+?\]|\(.+?\)', '', sTitle)
-            if not self.__sCleanTitle:
-                self.__sCleanTitle = sTitle.replace('[', '').replace(']', '').replace('(', '').replace(')', '')
-
         if isMatrix():
             # Python 3 decode sTitle
             try:
@@ -333,10 +338,7 @@ class cGuiElement:
             except:
                 pass
 
-        if not sTitle.startswith('[COLOR'):
-            self.__sTitle = self.TraiteTitre(sTitle)
-        else:
-            self.__sTitle = sTitle
+        self.__sTitle = self.TraiteTitre(sTitle)
 
     def getTitle(self):
         return self.__sTitle

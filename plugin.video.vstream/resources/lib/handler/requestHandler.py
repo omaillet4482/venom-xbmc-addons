@@ -14,6 +14,7 @@ class cRequestHandler:
     REQUEST_TYPE_POST = 1
     REQUEST_TYPE_PUT = 2
     REQUEST_TYPE_DELETE = 3
+    SITE_IDENTIFIER = "dnspython"
 
     def __init__(self, sUrl):
         self.__sUrl = sUrl
@@ -223,6 +224,10 @@ class cRequestHandler:
                             pass
 
         except ConnectionError as e:
+            # Erreur SSL
+            if 'CERTIFICATE_VERIFY_FAILED' in str(e) and self.BUG_SSL == False:
+                self.BUG_SSL = True
+                return self.__callRequest(jsonDecode)
             # Retry with DNS only if addon is present
             if self.__enableDNS == False and ('getaddrinfo failed' in str(e) or 'Failed to establish a new connection' in str(e) or 'Failed to resolve' in str(e)):
                 # Retry with DNS only if addon is present
@@ -282,7 +287,7 @@ class cRequestHandler:
     
                             sContent = response['solution']['response']
 
-            if self.oResponse and not sContent:
+            if self.oResponse is not None and not sContent:
                 # Ignorer ces codes retours
                 ignoreStatus = [200, 204, 302]
                 if self.oResponse.status_code not in ignoreStatus:
@@ -306,6 +311,7 @@ class cRequestHandler:
         try:
             import sys
             import dns.resolver
+            from resources.lib.comaddon import siteManager
 
             if isMatrix():
                 path = VSPath('special://home/addons/script.module.dnspython/lib/')
@@ -323,7 +329,12 @@ class cRequestHandler:
                 host = host[:host.find("/")]
             resolver = dns.resolver.Resolver(configure=False)
             # Résolveurs DNS ouverts: https://www.fdn.fr/actions/dns/
-            resolver.nameservers = ['80.67.169.12', '2001:910:800::12', '80.67.169.40', '2001:910:800::40', '45.90.28.130', '2a07:a8c0::71:a65b', '45.90.30.130', '2a07:a8c1::71:a65b']
+            # + Résolveurs CloudFlare
+            
+            URL_MAIN = siteManager().getUrlMain(self.SITE_IDENTIFIER)
+            if URL_MAIN == '':
+                URL_MAIN = "['1.1.1.1', '2606:4700:4700::1111', '80.67.169.12', '2001:910:800::12', '80.67.169.40', '2001:910:800::40']"
+            resolver.nameservers = eval(URL_MAIN)
             answer = resolver.query(host, 'a')
             host_found = str(answer[0])
             VSlog("new_getaddrinfo found host %s" % host_found)

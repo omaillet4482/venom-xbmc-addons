@@ -225,7 +225,7 @@ class cHosterGui:
                             'pdj', 'rapidstream', 'archive', 'dustreaming', 'viki', 'flix555', 'onlystream', 'filemoon',
                             'upstream', 'pstream', 'vudeo', 'vidia', 'streamtape', 'vidbem', 'uplea', 'vido', 'vidmoly',
                             'sibnet', 'vidplayer', 'userload', 'aparat', 'evoload', 'vidshar', 'abcvideo', 'plynow',
-                            'tomacloud', 'myvi', 'videovard', 'viewsb', 'yourvid', 'vf-manga', 'darkibox']
+                            'tomacloud', 'myvi', 'videovard', 'viewsb', 'yourvid', 'vf-manga', 'darkibox', 'mustardshock']
 
 # désactivé 'uptostream', 'uptobox'
 
@@ -244,8 +244,8 @@ class cHosterGui:
         if ('guccihide' in sHostName) or ('streamhide' in sHostName) or ('wishonly' in sHostName):
             return self.getHoster('streamhide')
 
-        if ('youtube' in sHostName) or ('youtu.be' in sHostName):
-            return self.getHoster('youtube')
+        # if ('youtube' in sHostName) or ('youtu.be' in sHostName):
+        #     return self.getHoster('youtube')
 
         if ('oneupload' in sHostName) or ('tipfly' in sHostName):
             return self.getHoster('oneupload')
@@ -271,6 +271,9 @@ class cHosterGui:
         if ('livestream' in sHostName):
             return self.getHoster('lien_direct')
 
+        if ('mustardshock' in sHostName):
+            return self.getHoster('lien_direct')
+
         # vidtodo et clone
         val = next((x for x in ['vidtodo', 'vixtodo', 'viddoto', 'vidstodo'] if x in sHostName), None)
         if val:
@@ -286,6 +289,9 @@ class cHosterGui:
                 return self.getHoster('dailymotion')
         if ('flashx' in sHostName) or ('filez' in sHostName):
             return self.getHoster('flashx')
+
+        if ('xcoic' in sHostName):
+            return self.getHoster('filemoon')
 
         if ('mystream' in sHostName) or ('mstream' in sHostName):
             return self.getHoster('mystream')
@@ -329,16 +335,18 @@ class cHosterGui:
         if ('clipwatching' in sHostName) or ('highstream' in sHostName):
             return self.getHoster('clipwatching')
 
-        if ('ds2play' in sHostName) or ('ds2video' in sHostName):
-            return self.getHoster('dood')
-
         if ('flixeo' in sHostName):
             return self.getHoster('allow_redirects')
 
+        if ('bigwarp' in sHostName):
+            return self.getHoster('flix555')
+ 
         if sHostName.replace('o','').replace('0','').replace('stream','').split('.')[0] == 'dd':
             return self.getHoster('dood')
+        if ('ds2play' in sHostName) or ('ds2video' in sHostName) or ('dooodster' in sHostName) or ('vidply' in sHostName):
+            return self.getHoster('dood')
 
-        if ('voe' in sHostName) or ('jamessoundcost' in sHostName) or ('magasavor' in sHostName)  or ('sandratableother' in sHostName):
+        if ('voe' in sHostName) or ('jamessoundcost' in sHostName) or ('magasavor' in sHostName)  or ('sandratableother' in sHostName) or ('alejandrocenturyoil' in sHostName):
             return self.getHoster('voe')
 
         if ('goo.gl' in sHostName) or ('bit.ly' in sHostName) or ('streamcrypt' in sHostName) or ('opsktp' in sHosterUrl):
@@ -349,7 +357,7 @@ class cHosterGui:
 
         # frenchvid et clone
         val = next((x for x in ['french-vid', 'yggseries', 'fembed', 'fem.tohds', 'feurl', 'fsimg', 'core1player',
-                                'vfsplayer', 'gotochus', 'sendvid', "femax"] if x in sHostName), None)
+                                'vfsplayer', 'gotochus', 'sendvid', 'femax'] if x in sHostName), None)
         if val:
             return self.getHoster("frenchvid")
 
