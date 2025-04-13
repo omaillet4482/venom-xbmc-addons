@@ -206,7 +206,12 @@
         "livetv": {
             "label": "Live TV",
             "active": "True",
-            "url": "https://livetv852.me/"
+            "url": "https://livetv852.me"
+        },
+        "livetv_b": {
+            "label": "Live TV BIS",
+            "active": "True",
+            "url": "https://liveru.sx/"
         },
         "monstream": {
             "label": "Mon Stream",
