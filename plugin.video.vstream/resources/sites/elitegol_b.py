@@ -27,9 +27,9 @@ URL_LINK = siteManager().getProperty(SITE_IDENTIFIER, 'url_link')
 
 
 SPORT_SPORTS = (True, 'load')
-SPORT_GENRES = ('/', 'showMovies','data-ch.php')  # FOOT
+SPORT_GENRES = ('/', 'showMovies','ch24.php')  # FOOT
 SPORT_LIVE = ('/', 'showMovies', 'json.php?ldc')
-SPORT_TV = ('/', 'showMovies','data-ch.php')
+SPORT_TV = ('/', 'showMovies','ch24.php')
 
 UA = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0'
 

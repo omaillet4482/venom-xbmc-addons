@@ -99,9 +99,9 @@
         "elitegol_b": {
             "label": "Elitegol",
             "active": "True",
-            "url": "https://calmatv.ru/",
-	    "site_info": "https://elitegol.lat/",
-	    "url_link": "plus/3"
+            "url": "https://kakarotfoot.ru/",
+	        "site_info": "https://elitegol.lat/",
+	        "url_link": "goku/3"
         },
         "extreme_down": {
             "label": "ExtremeDown",
