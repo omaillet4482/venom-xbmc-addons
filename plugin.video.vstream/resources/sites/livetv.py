@@ -4,6 +4,7 @@
 import base64
 import re
 import xbmc
+#import web_pdb
 
 from resources.lib.comaddon import isMatrix, siteManager
 from resources.lib.gui.gui import cGui
@@ -28,8 +29,8 @@ SITE_DESC = 'Evénements sportifs en direct'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 # URL_MAIN = dans sites.json
 
-SPORT_GENRES = ('frx/allupcoming/', 'showGenres')  # Liste de diffusion des sports
-SPORT_LIVE = ('frx/', 'showLive')  # streaming Actif
+SPORT_GENRES = ('/soccer/', 'showMovies')  # Liste de diffusion des sports
+SPORT_LIVE = ('/frx/', 'showLive')  # streaming Actif
 SPORT_SPORTS = (True, 'load')
 
 HEURE_HIVER = False
@@ -152,7 +153,8 @@ def showMovies():  # affiche les matchs en direct depuis la section showMovie
     sPattern = r'<a class="live" href="([^"]+)">([^<]+)</a>\s*(<br><img src=".+?/img/live.gif"><br>|<br>)\s*<span class="evdesc">([^<]+)\s*<br>\s*([^<]+)</span>'
     oParser = cParser()
     aResult = oParser.parse(sHtmlContent, sPattern)
-
+     
+    dicoStream = dict()
     if not aResult[0]:
         oGui.addText(SITE_IDENTIFIER)
     else:
@@ -163,7 +165,8 @@ def showMovies():  # affiche les matchs en direct depuis la section showMovie
             sThumb = ''
             taglive = ''
             sTitle2 = aEntry[1].replace('<br>', ' ')
-            sUrl3 = URL_MAIN + aEntry[0]
+#            sUrl3 = URL_MAIN + aEntry[0]
+            sUrl3 = aEntry[0]
 
             if 'live.gif' in aEntry[2]:
                 taglive = ' [COLOR limegreen] Online[/COLOR]'
@@ -205,19 +208,31 @@ def showMovies():  # affiche les matchs en direct depuis la section showMovie
 
             sTitle2 = ('%s - %s [COLOR yellow]%s[/COLOR]') % (sDate, sTitle2, sQual)
             sDisplayTitle = sTitle2 + taglive
+            
+            if dicoStream.update:
+                dicoStream[sDisplayTitle].append(sTitle2)
+            else:
+                dicoStream[sDisplayTitle] = [sTitle2]
+            #web_pdb.set_trace()
 
-            oOutputParameterHandler.addParameter('siteUrl3', sUrl3)
+            oOutputParameterHandler.addParameter('siteUrl4', sUrl3)
             oOutputParameterHandler.addParameter('sMovieTitle2', sTitle2)
             oOutputParameterHandler.addParameter('sThumb', sThumb)
-            oGui.addDir(SITE_IDENTIFIER, 'showMovies3', sDisplayTitle, 'sport.png', oOutputParameterHandler)
+            oGui.addDir(SITE_IDENTIFIER, 'showHosters', sDisplayTitle, 'sport.png', oOutputParameterHandler)
 
     oGui.setEndOfDirectory()
 
 
 def showMovies3():  # affiche les videos disponible du live
     oGui = cGui()
+
+
+    oGui.setEndOfDirectory()
+
+def showMoviesList():  # affiche les videos disponible du live
+    oGui = cGui()
     oInputParameterHandler = cInputParameterHandler()
-    sUrl3 = oInputParameterHandler.getValue('siteUrl3')
+    listURL = oInputParameterHandler.getValue('siteUrl3')
 
     oRequestHandler = cRequestHandler(sUrl3)
     sHtmlContent = oRequestHandler.request()
@@ -1284,6 +1299,20 @@ def showHosters():  # affiche les videos disponible du live
                 sHosterUrl = aResult[0]
 
         # TODO A TESTER
+        if 'vidalmane' in url:
+#            web_pdb.set_trace()
+            oRequestHandler = cRequestHandler(url)
+            sHtmlContent2 = oRequestHandler.request()
+            sPattern1 = '<script src="(https.+?)"'
+            aResult = re.findall(sPattern1, sHtmlContent2)
+            if aResult:
+                sHosterUrl2 = aResult[0]
+                oRequestHandler = cRequestHandler(sHosterUrl2)
+                sHtmlContent3 = oRequestHandler.request()
+                sPattern3 = 'src="([^"]+)"></iframe>'
+                aResult1 = re.findall(sPattern3, sHtmlContent3)
+                if aResult1:
+                    sHosterUrl = getHosterIframe(aResult1[0], url)
         if 'wiz1' in url:
             oRequestHandler = cRequestHandler(url)
             sHtmlContent2 = oRequestHandler.request()
