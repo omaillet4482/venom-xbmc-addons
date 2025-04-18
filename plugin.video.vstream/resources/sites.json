@@ -87,7 +87,7 @@
         "dnspython": {
             "label": "DNS Python",
             "active": "True",
-            "url": "['1.1.1.1', '2606:4700:4700::1111', '80.67.169.12', '2001:910:800::12', '80.67.169.40', '2001:910:800::40']"
+            "url": "['1.1.1.1','2606:4700:4700::1111','80.67.169.12', '2001:910:800::12', '80.67.169.40', '2001:910:800::40', '45.90.28.130', '2a07:a8c0::71:a65b', '45.90.30.130', '2a07:a8c1::71:a65b']"
         },
         "docu_fr": {
             "label": "Docu Fr",
@@ -110,6 +110,13 @@
             "url": "https://tutvlive.ru/",
             "site_info": "https://elitegol.lat/",
             "url_link": "player/%d"
+        },
+        "elitegol_b": {
+            "label": "Elitegol",
+            "active": "True",
+            "url": "https://tutvlive.ru/",
+	        "site_info": "https://elitegol.lat/",
+	        "url_link": "player/3"
         },
         "extreme_down": {
             "label": "ExtremeDown",
@@ -207,6 +214,11 @@
             "label": "Live TV",
             "active": "True",
             "url": "https://livetv852.me/"
+        },
+        "livetv_b": {
+            "label": "Live TV BIS",
+            "active": "True",
+            "url": "https://liveru.sx/"
         },
         "monstream": {
             "label": "Mon Stream",
