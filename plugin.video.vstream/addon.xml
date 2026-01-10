@@ -11,7 +11,7 @@
             </catch>
         </trycatch>
         <import addon="repository.vstream"/>
-        <import addon="script.module.pyqrcode"/>
+        <import addon="script.module.qrcode"/>
         <import addon="script.module.requests"/>
         <import addon="script.module.dnspython" optional="true"/>
         <import addon="script.module.web-pdb" optional="true"/>
