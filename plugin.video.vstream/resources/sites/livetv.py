@@ -1497,7 +1497,7 @@ def getUrl(sHtmlContent, url):
         channelKey = "mono" + id
         newUrl = 'new.newkso.ru'
     else:    # topembed.pw
-        sPattern = 'const CHANNEL_KEY="([^"]+)";'
+        sPattern = 'const CHANNEL_KEY\s*=\s*"([^"]+)";'
         result = re.findall(sPattern, sHtmlContent)
         if result:
             hostname = urlHostName(referer)
@@ -1507,7 +1507,7 @@ def getUrl(sHtmlContent, url):
             if newUrl:
                 newUrl = newUrl[0]
     if hostname:
-        referer = 'https://' + hostname + '/server_lookup.php?channel_id=' + channelKey
+        referer = 'https://' + hostname + '/server_lookup.js?channel_id='  + channelKey
         oRequestHandler = cRequestHandler(referer)
         response = oRequestHandler.request(jsonDecode=True)
         serverKey = response['server_key']
