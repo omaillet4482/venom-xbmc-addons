@@ -462,7 +462,7 @@ def reveal_pipe_split(html):
     numeric_mode = is_numeric_mode()
 
     def tokenToInt(token):
-        if numeric_mode:
+        if True:
             return int(token)
         if token.isalpha() and not token.isupper(): # a-z
             return ord(token) - 87   # -> 10-35
@@ -487,5 +487,5 @@ def reveal_pipe_split(html):
     for result in results:
         mask = result[0]
         keywords = result[1].split('|')
-        text += re.sub('([0-9a-zA-Z]+)',replaceNumber, mask)
+        text += re.sub('([0-9]+)',replaceNumber, mask)
     return text

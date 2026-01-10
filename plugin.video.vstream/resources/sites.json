@@ -216,8 +216,13 @@
         },
         "livetv": {
             "label": "Live TV",
-            "active": "False",
-            "url": "https://livetv869.me/"
+            "active": "True",
+            "url": "https://livetv.sx/"
+        },
+        "livetv_b": {
+            "label": "Live TV BIS",
+            "active": "True",
+            "url": "https://liveru.sx/"
         },
         "monstream": {
             "label": "Mon Stream",
