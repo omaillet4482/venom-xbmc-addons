@@ -5,7 +5,7 @@ import base64
 import re
 import xbmc
 
-from resources.lib.comaddon import isMatrix, siteManager
+from resources.lib.comaddon import isMatrix, siteManager, VSlog
 from resources.lib.gui.gui import cGui
 from resources.lib.gui.hoster import cHosterGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
@@ -1353,7 +1353,8 @@ def getHosterVar16(url, referer):
 
 # Traitement générique
 def getHosterIframe(url, referer):
-
+    VSlog("iframe " + url)
+ 
     if 'getbanner.php' in url:
         return False
     
@@ -1475,6 +1476,17 @@ def getUrl(sHtmlContent, url):
         link = aResult[1][0]
         return link + '|referer=' + referer
     
+    sPattern = r'"(api/player.php\?id=([0-9]+))"'
+    aResult = oParser.parse(sHtmlContent, sPattern)
+    if aResult[0]:
+        web_pdb.set_trace()
+        apiTmp = aResult[1][0][0]
+        hostTmp = referer.split('/')[2]
+        oRequestHandler = cRequestHandler('https://'+hostTmp+'/'+apiTmp)
+        oRequestHandler.addHeaderEntry('Referer', referer)
+        jsonTmp = oRequestHandler.request(jsonDecode=True)
+        return getHosterIframe(jsonTmp['url'], referer)
+
     sPattern = r'https://(.+?\.xyz)/mono.php\?id=([0-9]+)'
     result = re.findall(sPattern, referer)
     hostname = None
@@ -1484,7 +1496,7 @@ def getUrl(sHtmlContent, url):
         channelKey = "mono" + id
         newUrl = 'new.newkso.ru'
     else:    # topembed.pw
-        sPattern = 'var channelKey = "([^"]+)";'
+        sPattern = 'const CHANNEL_KEY="([^"]+)";'
         result = re.findall(sPattern, sHtmlContent)
         if result:
             hostname = urlHostName(referer)
