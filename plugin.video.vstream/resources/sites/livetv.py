@@ -4,7 +4,7 @@
 import base64
 import re
 import xbmc
-import web_pdb
+#import web_pdb
 
 from resources.lib.comaddon import isMatrix, siteManager, VSlog
 from resources.lib.gui.gui import cGui
