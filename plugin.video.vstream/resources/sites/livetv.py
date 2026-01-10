@@ -4,6 +4,7 @@
 import base64
 import re
 import xbmc
+import web_pdb
 
 from resources.lib.comaddon import isMatrix, siteManager, VSlog
 from resources.lib.gui.gui import cGui
@@ -28,8 +29,8 @@ SITE_DESC = 'Evénements sportifs en direct'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 # URL_MAIN = dans sites.json
 
-SPORT_GENRES = ('frx/allupcoming/', 'showGenres')  # Liste de diffusion des sports
-SPORT_LIVE = ('frx/', 'showLive')  # streaming Actif
+SPORT_GENRES = ('enx/allupcoming/', 'showGenres')  # Liste de diffusion des sports
+SPORT_LIVE = ('enx/', 'showLive')  # streaming Actif
 SPORT_SPORTS = (True, 'load')
 
 HEURE_HIVER = False
