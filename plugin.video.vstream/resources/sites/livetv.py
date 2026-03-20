@@ -1480,7 +1480,7 @@ def getUrl(sHtmlContent, url):
     sPattern = r'"(api/player.php\?id=([0-9]+))"'
     aResult = oParser.parse(sHtmlContent, sPattern)
     if aResult[0]:
-        web_pdb.set_trace()
+ #       web_pdb.set_trace()
         apiTmp = aResult[1][0][0]
         hostTmp = referer.split('/')[2]
         oRequestHandler = cRequestHandler('https://'+hostTmp+'/'+apiTmp)
