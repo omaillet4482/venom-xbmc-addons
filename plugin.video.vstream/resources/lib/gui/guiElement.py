@@ -342,7 +342,7 @@ class cGuiElement:
                 pass
         else:
             try:
-                sTitle = str(sTitle.strip().decode('utf-8'))
+                sTitle = str(sTitle.decode('utf-8'))
             except:
                 pass
 
@@ -625,6 +625,18 @@ class cGuiElement:
             if url:
                 self.__sThumbnail = url
 #                self.__sPoster = url
+
+        if 'logo_path' in meta:
+            url = meta.pop('logo_path')
+            if url:
+                # Rétrocompatibilité: anciennes valeurs en base stockées en chemin relatif TMDB.
+                if str(url).startswith('/'):
+                    url = 'https://image.tmdb.org/t/p/original' + str(url)
+                self.addItemProperties('clearlogo_image', url)
+                if metaType in (1, 3):
+                    self.addItemValues('clearlogo', url)
+                if metaType in (2, 4, 5, 6):
+                    self.addItemValues('tvshow.clearlogo', url)
 
         if 'trailer' in meta and meta['trailer']:
             self.__sTrailer = meta['trailer']

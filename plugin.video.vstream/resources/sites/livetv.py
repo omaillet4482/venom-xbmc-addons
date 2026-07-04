@@ -1112,7 +1112,8 @@ def showHosters():  # affiche les videos disponible du live
                 aResult = re.findall(sPattern1, sHtmlContent2)
                 if aResult:
                     host = aResult[0]
-            if host and channel : 
+
+            if host and channel :
                 sHosterUrl = 'https://' + host + '/' + channel + '.m3u8'
 
         if 'sportgol7' in url:

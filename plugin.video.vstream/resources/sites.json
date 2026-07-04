@@ -56,6 +56,11 @@
             "active": "False",
             "url": "https://cinemay.li/"
         },
+        "cinestream": {
+            "label": "cinestream",
+            "active": "True",
+            "url": "https://cinestream.info/"
+        },
         "cloudproxy": {
             "label": "Proxy cloudflare",
             "active": "True",
@@ -64,16 +69,16 @@
         "coflix": {
             "label": "Coflix",
             "active": "True",
-            "url": "https://coflix.dance/"
+            "url": "https://coflix.trade/"
         },
         "cpasmal": {
             "label": "CpasMal",
             "active": "True",
+            "cloudflare": "True",
             "url": "https://www.cpasmal.rip/"
         },
         "cpasmieux": {
             "label": "Cpasmieux",
-            "cloudflare": "True",
             "active": "True",
             "url": "https://www.cpasmieux.is/"
         },
@@ -84,7 +89,7 @@
         },
         "darkiworld": {
             "label": "darkiworld",
-            "active": "True",
+            "active": "False",
             "url": "https://hydracker.com/"
         },
         "debrid_link": {
@@ -133,7 +138,7 @@
             "label": "Filmoflix",
             "active": "False",
             "cloudflare": "True",
-            "url": "https://www.wishflix.icu/"
+            "url": "https://filmoflix.fitness/"
         },
         "filmsetvideos": {
             "label": "filmsetvideos",
@@ -165,7 +170,7 @@
             "label": "French-stream",
             "active": "True",
             "site_info": "https://fstream.info/",
-            "url": "https://fs03.lol/"
+            "url": "https://fs24.lol/"
         },
         "french_stream_lol": {
             "label": "French-stream-lol",
@@ -185,7 +190,7 @@
         },
         "gum_gum_streaming_com": {
             "label": "Gum-Gum-Streaming",
-            "active": "True",
+            "active": "False",
             "url": "https://gum-gum-streaming.com/"
         },
         "ianime": {
@@ -220,10 +225,11 @@
             "active": "True",
             "url": "https://livetv901.me/"
         },
-        "livetv_b": {
-            "label": "Live TV BIS",
+        "livewatch": {
+            "label": "livewatch",
             "active": "True",
-            "url": "https://liveru.sx/"
+            "url": "https://livewatch.top/",
+            "url_api": "https://livewatch.top/api/"
         },
         "monstream": {
             "label": "Mon Stream",
@@ -238,7 +244,7 @@
         },
         "mysteriam": {
             "label": "MySteriam",
-            "active": "True",
+            "active": "False",
             "url": "https://www.inmysteriam.fr/"
         },
         "neymartv": {
@@ -376,7 +382,7 @@
             "active": "True",
             "cloudflare": "False",
             "site_info": "https://www.wiflix-nouvelle-adresse.site/",
-            "url": "https://flemmix.win/"
+            "url": "https://flemmix.fast/"
         },
         "wilifilm": {
             "label": "Wilifilm",
@@ -386,7 +392,7 @@
         "witv": {
             "label": "wiTV",
             "active": "True",
-            "url": "https://witv.team/"
+            "url": "https://witv.football/"
         },
         "youtitou_com": {
             "label": "YouTitou (Anim\u00e9s)",

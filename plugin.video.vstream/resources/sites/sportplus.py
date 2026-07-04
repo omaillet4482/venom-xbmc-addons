@@ -2,6 +2,7 @@
 # vStream https://github.com/Kodi-vStream/venom-xbmc-addons
 
 import time
+import datetime
 
 from resources.lib.comaddon import siteManager
 from resources.lib.gui.gui import cGui
@@ -9,6 +10,8 @@ from resources.lib.gui.hoster import cHosterGui
 from resources.lib.handler.inputParameterHandler import cInputParameterHandler
 from resources.lib.handler.outputParameterHandler import cOutputParameterHandler
 from resources.lib.handler.requestHandler import cRequestHandler
+from resources.lib.util import cUtil
+import json
 
 
 SITE_IDENTIFIER = 'sportplus'
@@ -40,13 +43,17 @@ def load():
 
 def showGenres():
     oGui = cGui()
+    oUtil = cUtil()
+    
     oInputParameterHandler = cInputParameterHandler()
     sUrl = URL_API + oInputParameterHandler.getValue('siteUrl')
     oRequestHandler = cRequestHandler(sUrl)
-    sHtmlContent = oRequestHandler.request(jsonDecode=True)
+    sHtmlContent = oRequestHandler.request()
+    sHtmlContent = oUtil.formatUTF8(sHtmlContent)
+    genres = json.loads(sHtmlContent)
 
     oOutputParameterHandler = cOutputParameterHandler()
-    for genre in sorted(sHtmlContent, key=lambda genre: genre['name']):
+    for genre in sorted(genres, key=lambda genre: genre['name']):
         if 'type' in genre:
             continue
         sUrl = genre['alias']
@@ -75,13 +82,12 @@ def showLive():
 
     oOutputParameterHandler = cOutputParameterHandler()
     for item in sHtmlContent['items']:
-        sTitle = item['name']
+        sTitle = item['name'].replace(u'—', u'-')
         sportId = item['sport_id']
         sUrl = 'id=%s&sport_id=%s' % (item['id'], sportId)
         sDate = item['start']
         sDisplayTitle = sTitle
         if sDate:
-            import datetime
             # Parse avec timezone
             dt = datetime.datetime(*(time.strptime(sDate[:19], '%Y-%m-%dT%H:%M:%S')[0:6]))
             # Timezone France
@@ -124,12 +130,11 @@ def showMovies():
     oOutputParameterHandler = cOutputParameterHandler()
     for item in sHtmlContent['items']:
         taglive = item['status'] == 'live'
-        sTitle = item['name']
+        sTitle = item['name'].replace(u'—', u'-')
         sUrl = 'id=%s&sport_id=%s' % (item['id'], sportId)
         sDate = item['start']
         sDisplayTitle = sTitle
         if sDate:
-            import datetime 
             # Parse avec timezone
             dt = datetime.datetime(*(time.strptime(sDate[:19], '%Y-%m-%dT%H:%M:%S')[0:6]))
             # Timezone France
@@ -147,7 +152,7 @@ def showMovies():
                 sDisplayTitle += ' [COLOR yellow][%s][/COLOR]' % tournament.replace('-', ' ').upper()
 
         if taglive:
-            sDisplayTitle += ' [COLOR red][En cours][/COLOR]'
+            sDisplayTitle += ' [COLOR green][En cours][/COLOR]'
 
         oOutputParameterHandler.addParameter('siteUrl', sUrl)
         oOutputParameterHandler.addParameter('sMovieTitle', sTitle)
