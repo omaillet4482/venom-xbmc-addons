@@ -21,7 +21,7 @@ class cUpdate:
         time_now = datetime.datetime.now()
         time_service = self.__strptime(setting_time)
         time_sleep = datetime.timedelta(hours = 10)
-        if false :
+        if False :
             sUrl = 'https://raw.githubusercontent.com/Kodi-vStream/venom-xbmc-addons/Beta/plugin.video.vstream/resources/sites.json'
             oRequestHandler = cRequestHandler(sUrl)
             properties = oRequestHandler.request(jsonDecode=True)
