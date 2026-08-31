@@ -222,8 +222,8 @@
         },
         "livetv": {
             "label": "Live TV",
-            "active": "False",
-            "url": "https://livetv902.me/"
+            "active": "True",
+            "url": "https://livetv903.me/"
         },
         "livewatch": {
             "label": "livewatch",
