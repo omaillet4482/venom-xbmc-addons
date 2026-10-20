@@ -28,8 +28,8 @@ SITE_DESC = 'Evénements sportifs en direct'
 URL_MAIN = siteManager().getUrlMain(SITE_IDENTIFIER)
 # URL_MAIN = dans sites.json
 
-SPORT_GENRES = ('frx/allupcomingsports/', 'showGenres')  # Liste de diffusion des sports
-SPORT_LIVE = ('frx/', 'showLive')  # streaming Actif
+SPORT_GENRES = ('enx/allupcomingsports/', 'showGenres')  # Liste de diffusion des sports
+SPORT_LIVE = ('enx/', 'showLive')  # streaming Actif
 SPORT_SPORTS = (True, 'load')
 
 HEURE_HIVER = False
